@@ -7,18 +7,23 @@ def correct_markerless_fq_folder(folder_marker_based: Path, folder_markerless_to
     """
 
     for subject_folder in folder_marker_based.iterdir():
+        if not subject_folder.is_dir():
+            continue
         subject_name = subject_folder.name
         print(f"\n--- Processing subject: {subject_name} ---")
+        folder_subject_markerbase = folder_marker_based / subject_name / "Final"
+
         # Check if the subject folder exists in the markerless folder
-        ml_subject_folder = folder_markerless_to_correct / subject_name
+        ml_subject_folder = folder_markerless_to_correct / subject_name / "Final"
         if not ml_subject_folder.exists():
             print(f"❌ No markerless data for {subject_name}")
             continue
+        
         # Create the output folder for the corrected markerless data
-        output_subject_folder = folder_marker_less_to_export / subject_name
+        output_subject_folder = folder_marker_less_to_export / subject_name /"Final"
         if not output_subject_folder.exists():
             output_subject_folder.mkdir(parents=True, exist_ok=True)
-        for trial in subject_folder.glob("*.c3d"):
+        for trial in folder_subject_markerbase.glob("*.c3d"):
             trial_name = trial.stem
             print(f"Processing trial: {trial_name}")
             # Check if the corresponding markerless trial exists
@@ -59,3 +64,9 @@ def correct_markerless_fq_file(trial: Path, ml_trial_path: Path, output_subject_
     
     print(str(output_subject_folder / f"{trial_name}.c3d"))
     c3d_ml.write(str(output_subject_folder / f"{trial_name}.c3d"))
+
+def trim_marker_less_data_folder(folder_marker_less: Path, folder_marker_based: Path):
+    pass
+
+def trim_marker_less_data_file(trial_marker_less: Path, trial_marker_based: Path, output_folder: Path):
+    pass
