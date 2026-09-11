@@ -6,25 +6,26 @@ import ezc3d
 def transforms_zero_to_nan(point_data):
     """
     Transforms all [0, 0, 0] points in the point data to NaN.
-    
+
     Parameters:
     -----------
     point_data : np.ndarray
         Array of shape (n_channels, n_points, n_frames).
-        
+
     Returns:
     --------
     transformed_data : np.ndarray
         Point data with [0.0, 0.0, 0.0] replaced by NaN.
     """
-    transformed_data = np.where(np.all(point_data[0:3,:,:] == 0.0, axis=0), np.nan, point_data)
+    transformed_data = np.where(np.all(point_data[0:3, :, :] == 0.0, axis=0), np.nan, point_data)
 
     return transformed_data
+
 
 def resample_point_data(point_data, original_frame_rate, target_frame_rate):
     """
     Resamples the point data from the original frame rate to the target frame rate.
-    
+
     Parameters:
     -----------
     point_data : np.ndarray
@@ -33,7 +34,7 @@ def resample_point_data(point_data, original_frame_rate, target_frame_rate):
         Original sampling frequency of the trial (Hz).
     target_frame_rate : float or int
         Desired sampling frequency of the trial (Hz).
-        
+
     Returns:
     --------
     resampled_data : np.ndarray
@@ -51,7 +52,7 @@ def resample_point_data(point_data, original_frame_rate, target_frame_rate):
 def filter_point_data_with_NaN(point_data, frame_rate, cutoff=6.0, order=4):
     """
     Applies a zero-phase low-pass Butterworth filter to 3D point data.
-    
+
     Parameters:
     -----------
     point_data : np.ndarray
@@ -62,13 +63,13 @@ def filter_point_data_with_NaN(point_data, frame_rate, cutoff=6.0, order=4):
         Cutoff frequency in Hz (default: 6.0 Hz).
     order : int
         Filter order (default: 2, resulting in an effective 4th-order filter after dual-pass).
-        
+
     Returns:
     --------
     filtered_data : np.ndarray
         Filtered point data matrix of the same shape.
     """
-    
+
     # Calculate the Nyquist frequency
     nyquist_freq = 0.5 * frame_rate
 
@@ -76,7 +77,7 @@ def filter_point_data_with_NaN(point_data, frame_rate, cutoff=6.0, order=4):
     normalized_cutoff = cutoff / nyquist_freq
 
     # Design the Butterworth filter
-    b, a = butter(order, normalized_cutoff, btype='low', analog=False)
+    b, a = butter(order, normalized_cutoff, btype="low", analog=False)
 
     # Initialize the filtered data array with NaNs
     filtered_data = np.full_like(point_data, np.nan)
@@ -157,8 +158,7 @@ def extract_trim_from_marker_based(path_c3d):
     return to_trim, start_idx, end_idx
 
 
-
-def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file : float, output_path : Path):
+def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, output_path: Path):
     """
     Write a new C3D file with the given points, point names, and frame rate.
     points: np.ndarray of shape (n_channels, n_points, n_frames)
@@ -171,10 +171,10 @@ def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file : float, ou
     c3d = ezc3d.c3d()
 
     # Fill it with random data
-    c3d['parameters']['POINT']['UNITS']['value'] = ['mm']
-    c3d['parameters']['POINT']['RATE']['value'] = fq_new_file
-    c3d['parameters']['POINT']['LABELS']['value'] = name_points 
-    c3d['data']['points'] = points
+    c3d["parameters"]["POINT"]["UNITS"]["value"] = ["mm"]
+    c3d["parameters"]["POINT"]["RATE"]["value"] = fq_new_file
+    c3d["parameters"]["POINT"]["LABELS"]["value"] = name_points
+    c3d["data"]["points"] = points
 
     # Save the new C3D file
     c3d.write(str(output_path))
