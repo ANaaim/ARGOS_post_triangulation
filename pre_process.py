@@ -7,7 +7,7 @@ from utils import (transforms_zero_to_nan,
                    load_c3d,
                    write_new_c3d,
                    filter_point_data_with_nan_segments,
-                   XYZ_to_ZXY)
+                   XYZ_to_ZXY, calculate_RAB)
 import snip_ezc3d as snip
 
 def correct_markerless_fq_folder(folder_marker_based: Path, folder_markerless_to_correct: Path, folder_marker_less_to_export: Path):
@@ -141,10 +141,16 @@ def pre_processed_marker_based_files(file_path: Path, output_folder: Path):
                                                     original_frame_rate=fq, 
                                                         target_frame_rate=target_fps)
 
-    # TODO : Rajout export points (necessaire ou pas)
+    # Calculate GH with RAB to add in the data
+    R_GH,L_GH = calculate_RAB(resampled_points, labels)
+
 
     exported_c3d_path =  output_folder / f"{file_path.stem}.c3d"
     name_points = c3d['parameters']['POINT']['LABELS']['value']
+    # Add the R_GH and L_GH to the resampled_points
+    resampled_points = np.concatenate((resampled_points, R_GH[:, np.newaxis, :], L_GH[:, np.newaxis, :]), axis=1)
+    name_points.append("R_GH")
+    name_points.append("L_GH")
     
     write_new_c3d(resampled_points, name_points, target_fps, str(output_folder / f"{file_name}")) 
 
