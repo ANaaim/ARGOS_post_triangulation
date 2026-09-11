@@ -1,6 +1,7 @@
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, sosfiltfilt
 import numpy as np
 import ezc3d
+from pathlib import Path
 
 
 def transforms_zero_to_nan(point_data):
@@ -22,7 +23,7 @@ def transforms_zero_to_nan(point_data):
     return transformed_data
 
 
-def resample_point_data(point_data, original_frame_rate, target_frame_rate):
+def resample_point_data(point_data: np.ndarray, original_frame_rate: float, target_frame_rate: float):
     """
     Resamples the point data from the original frame rate to the target frame rate.
 
@@ -88,7 +89,7 @@ def filter_point_data_with_NaN(point_data, frame_rate, cutoff=6.0, order=4):
             segment = point_data[channel, point, :]
             valid_indices = ~np.isnan(segment)
             if np.sum(valid_indices) > 3 * max(len(a), len(b)):
-                filtered_segment = filtfilt(b, a, segment[valid_indices])
+                filtered_segment = sosfiltfilt(b, a, segment[valid_indices])
                 filtered_data[channel, point, valid_indices] = filtered_segment
 
     return filtered_data
