@@ -1,5 +1,6 @@
 /data
 /figures
 /logs
-
-
+/old
+*.pyc
+*.zip
