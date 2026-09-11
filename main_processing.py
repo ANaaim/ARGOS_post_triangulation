@@ -1,7 +1,8 @@
 from pathlib import Path
 from pre_process import (correct_markerless_fq_folder,
                         pre_processed_marker_based_folder,
-                        pre_processed_marker_less_folder)
+                        pre_processed_marker_less_folder,
+                        fusion_markerless_model)
 
 # defintion of the folder of the data 
 data_folder_raw_marker_based = Path("D:\\Users\\naaim\\NextCloud\\Projet ARGOS\\Data\\Marker-based")
@@ -37,17 +38,19 @@ def pre_process_marker_less_data():
         folder_marker_less_fq_corrected = pp_marker_less_folder / "ML_fq_corrected" / model
         folder_marker_less_to_export = pp_marker_less_folder / model 
 
-        correct_markerless_fq_folder(folder_marker_based, folder_markerless_to_correct, folder_marker_less_fq_corrected)
+        # correct_markerless_fq_folder(folder_marker_based, folder_markerless_to_correct, folder_marker_less_fq_corrected)
 
-        pre_processed_marker_less_folder(folder_marker_based = folder_marker_based,
-                                        folder_markerless_to_correct = folder_marker_less_fq_corrected,
-                                        folder_marker_less_to_export = folder_marker_less_to_export,
-                                        remove_nan = True,
-                                        filter_data = True,
-                                        cutoff = 6.0,
-                                        order = 4)
+        # pre_processed_marker_less_folder(folder_marker_based = folder_marker_based,
+        #                                 folder_markerless_to_correct = folder_marker_less_fq_corrected,
+        #                                 folder_marker_less_to_export = folder_marker_less_to_export,
+        #                                 remove_nan = True,
+        #                                 filter_data = True,
+        #                                 cutoff = 6.0,
+        #                                 order = 4)
     # fusion of the RTMPOSE and SynthPose data into one files
-    
+    fusion_markerless_model(path_synthpose = pp_marker_less_folder / "SynthPose",
+                            path_rtmpose = pp_marker_less_folder / "RTMPose", 
+                            path_export = pp_marker_less_folder / "SynthRTMPose")
 
 if __name__ == "__main__":
     #pre_process_marker_based_data()
