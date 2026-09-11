@@ -6,7 +6,6 @@ from pathlib import Path
 #     resample_point_data_mb,
 #     trim_c3d_trial_mb,
 # )
-from plot_functions import save_c3d_markers_3d_html
 import numpy as np
 from utils import (transforms_zero_to_nan, 
                    filter_point_data_with_NaN,
@@ -26,10 +25,12 @@ def correct_markerless_fq_folder(folder_marker_based: Path, folder_markerless_to
             continue
         subject_name = subject_folder.name
         print(f"\n--- Processing subject: {subject_name} ---")
+        
         folder_subject_markerbase = folder_marker_based / subject_name / "Final"
 
         # Check if the subject folder exists in the markerless folder
-        ml_subject_folder = folder_markerless_to_correct / subject_name / "Final"
+        subject_name_ml = "Sujet_0"+subject_name[-2:]
+        ml_subject_folder = folder_markerless_to_correct / subject_name_ml
         if not ml_subject_folder.exists():
             print(f"❌ No markerless data for {subject_name}")
             continue
