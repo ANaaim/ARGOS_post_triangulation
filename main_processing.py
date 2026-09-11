@@ -5,7 +5,7 @@ from pre_process import (correct_markerless_fq_folder,
 
 # defintion of the folder of the data 
 data_folder_raw_marker_based = Path("D:\\Users\\naaim\\NextCloud\\Projet ARGOS\\Data\\Marker-based")
-data_folder_raw_marker_less = Path("D:\\Users\\naaim\\NextCloud\\Projet ARGOS\\Data\\Markerless\\triangulation_20px")
+data_folder_raw_marker_less = Path(".\\data\\raw\\marker_less\\triangulation_20px")
 marker_less_model = ["SynthPose","RTMPose"]
 
 # pre_processed data folder
@@ -32,9 +32,9 @@ def pre_process_marker_less_data():
     for model in marker_less_model:
         # Pre-process the data for each model
         # Correction of the frame rate of the marker-less data based on the corresponding marker-based data.
-        folder_markerless_to_correct = data_folder_raw_marker_less #/ model TODO : considering mutiple marker-less models, we should add the model name to the path, but for now, we will consider only one model.
+        folder_markerless_to_correct = data_folder_raw_marker_less / model
         folder_marker_based = data_folder_raw_marker_based
-        folder_marker_less_fq_corrected = pp_marker_less_folder /"ML_fq_corrected" / model
+        folder_marker_less_fq_corrected = pp_marker_less_folder / "ML_fq_corrected" / model
         folder_marker_less_to_export = pp_marker_less_folder / model 
 
         correct_markerless_fq_folder(folder_marker_based, folder_markerless_to_correct, folder_marker_less_fq_corrected)
@@ -46,9 +46,11 @@ def pre_process_marker_less_data():
                                         filter_data = True,
                                         cutoff = 6.0,
                                         order = 4)
+    # fusion of the RTMPOSE and SynthPose data into one files
+    
 
 if __name__ == "__main__":
-    pre_process_marker_based_data()
+    #pre_process_marker_based_data()
     pre_process_marker_less_data()
 
 
