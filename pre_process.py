@@ -2,12 +2,12 @@ import ezc3d
 from pathlib import Path
 import numpy as np
 from utils import (transforms_zero_to_nan, 
-                   filter_point_data_with_NaN,
                    extract_trim_from_marker_based,
                    resample_point_data,
                    load_c3d,
                    write_new_c3d,
-                   filter_point_data_with_nan_segments)
+                   filter_point_data_with_nan_segments,
+                   XYZ_to_ZXY)
 import snip_ezc3d as snip
 
 def correct_markerless_fq_folder(folder_marker_based: Path, folder_markerless_to_correct: Path, folder_marker_less_to_export: Path):
@@ -205,11 +205,12 @@ def pre_processed_marker_less_files(ml_trial_path: Path, mb_trial_path: Path, ou
     c3d_ml, points_ml, fq_ml, name_points = load_c3d(ml_trial_path)
     c3d_mb, points_mb, fq_mb, name_points_mb = load_c3d(mb_trial_path)
 
+    point_ml_reoriented = XYZ_to_ZXY(points_ml)
     # Remove [0,0,0] in markers and replace them with NaN
     if remove_nan:
-        points_ml_NaN = transforms_zero_to_nan(points_ml)
+        points_ml_NaN = transforms_zero_to_nan(point_ml_reoriented)
     else:
-        points_ml_NaN = points_ml
+        points_ml_NaN = point_ml_reoriented
 
     if filter_data:
         points_ml_filtered = filter_point_data_with_nan_segments(points_ml_NaN,
@@ -233,6 +234,7 @@ def pre_processed_marker_less_files(ml_trial_path: Path, mb_trial_path: Path, ou
 
 
 def fusion_markerless_model(path_synthpose:Path, path_rtmpose: list, path_export: Path):
+    
     """
     Fusion of the markerless data from different models into one file.
     """
@@ -270,6 +272,54 @@ def fusion_markerless_model(path_synthpose:Path, path_rtmpose: list, path_export
             points_to_add = dict()
 
             for point_name in list_points_RTMPOSE:
+                if point_name in c3d_rtmpose["parameters"]["POINT"]["LABELS"]["value"]:
+                    point_index = c3d_rtmpose["parameters"]["POINT"]["LABELS"]["value"].index(point_name)
+                    point_data = c3d_rtmpose["data"]["points"][:3, point_index, :]
+
+                    points_to_add[point_name] = point_data
+                else:
+                    print(f"Point {point_name} not found in {trial_name} of {name_subject}")
+            
+
+            acq = snip.add_point_from_dictionary(c3d_synthpose, points_to_add)
+            # export the new c3d file in path_export
+            acq.write(str(path_export / name_subject / f"{trial_name}.c3d"))
+
+def fusion_model(path_synthpose:Path, path_rtmpose: list, path_export: Path):
+    """
+    Fusion of the markerless data from different models into one file.
+    """
+    # extract all_subject in path_synthpose
+    all_subjects_synthpose = [f for f in path_synthpose.iterdir() if f.is_dir()]
+    print(f"Found {len(all_subjects_synthpose)} subjects in {path_synthpose}")
+    print(f"Found {all_subjects_synthpose}")
+    # for each subject, extract all trials in path_synthpose
+    for subject in all_subjects_synthpose:
+        print(f"Processing subject: {subject.name}")
+        # extract all c3d files in the subject folder
+        all_trials_synthpose = [f for f in subject.iterdir() if f.is_file() and f.suffix == ".c3d"]
+        name_subject = subject.name
+        if len(all_trials_synthpose) == 0:
+            print(f"No c3d file found in {subject}")
+            continue
+
+        # Check if the folder of the subject exist in path_export, if not create it
+        if not (path_export / name_subject).exists():
+            (path_export / name_subject).mkdir(parents=True, exist_ok=True)
+
+        
+        for trial in all_trials_synthpose:
+            print(f"Processing trial: {trial}")
+            trial_name = trial.stem
+            print(f"Trial name: {trial_name}")
+            # read the c3d file
+            c3d_synthpose = ezc3d.c3d(str(trial))
+            c3d_rtmpose = ezc3d.c3d(str(path_rtmpose / name_subject / f"{trial_name}.c3d"))
+            # create a dictionary with the points to add from c3d_rtmpose
+            points_to_add = dict()
+            list_points_name_to_add = c3d_rtmpose["parameters"]["POINT"]["LABELS"]["value"]
+            
+            for point_name in list_points_name_to_add:
                 if point_name in c3d_rtmpose["parameters"]["POINT"]["LABELS"]["value"]:
                     point_index = c3d_rtmpose["parameters"]["POINT"]["LABELS"]["value"].index(point_name)
                     point_data = c3d_rtmpose["data"]["points"][:3, point_index, :]

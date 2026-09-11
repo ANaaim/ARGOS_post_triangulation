@@ -22,6 +22,26 @@ def transforms_zero_to_nan(point_data):
 
     return transformed_data
 
+def XYZ_to_ZXY(points_data: np.ndarray):
+    """
+    Reorders the coordinate system of the point data from (X, Y, Z) to (Z, X, Y) to allow markerless data to beoriented in the same 
+    way as the marker-based data.
+
+    Parameters
+    ----------
+    point : np.ndarray
+        Array of shape (4, n_markers, n_frames) representing the point data.
+    
+    Returns
+    -------
+    point_data_reoriented : np.ndarray
+        Reordered point data with shape (4, n_markers, n_frames).
+
+    """
+    # 2. Re-order coordinate system: (X, Y, Z, 1) -> (Z, X, Y, 1)
+    point_data_reoriented = points_data[[2, 0, 1, 3], :, :]
+
+    return point_data_reoriented
 
 def resample_point_data(point_data: np.ndarray,
                         original_frame_rate: float,
@@ -50,52 +70,6 @@ def resample_point_data(point_data: np.ndarray,
     resampled_data = point_data[:, :, ::resample_factor]
 
     return resampled_data
-
-
-def filter_point_data_with_NaN(point_data, frame_rate, cutoff=6.0, order=4):
-    """
-    Applies a zero-phase low-pass Butterworth filter to 3D point data.
-
-    Parameters:
-    -----------
-    point_data : np.ndarray
-        Array of shape (n_channels, n_points, n_frames).
-    frame_rate : float or int
-        Sampling frequency of the trial (Hz).
-    cutoff : float
-        Cutoff frequency in Hz (default: 6.0 Hz).
-    order : int
-        Filter order (default: 2, resulting in an effective 4th-order filter after dual-pass).
-
-    Returns:
-    --------
-    filtered_data : np.ndarray
-        Filtered point data matrix of the same shape.
-    """
-
-    # Calculate the Nyquist frequency
-    nyquist_freq = 0.5 * frame_rate
-
-    # Normalize the cutoff frequency
-    normalized_cutoff = cutoff / nyquist_freq
-
-    # Design the Butterworth filter
-    b, a = butter(order, normalized_cutoff, btype="low", analog=False)
-
-    # Initialize the filtered data array with NaNs
-    filtered_data = np.full_like(point_data, np.nan)
-
-    # Apply the filter to each channel and point, handling NaNs
-    for channel in range(point_data.shape[0]):
-        for point in range(point_data.shape[1]):
-            segment = point_data[channel, point, :]
-            valid_indices = ~np.isnan(segment)
-            if np.sum(valid_indices) > 3 * max(len(a), len(b)):
-                filtered_segment = sosfiltfilt(b, a, segment[valid_indices])
-                filtered_data[channel, point, valid_indices] = filtered_segment
-
-    return filtered_data
-
 
 def extract_trim_from_marker_based(path_c3d):
     """Trims 3D point data based on 'begin' and 'end' events, appends the trim
