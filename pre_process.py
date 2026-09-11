@@ -129,10 +129,7 @@ def pre_processed_marker_based_files(file_path: Path, output_folder: Path):
 
     # 2. Trim and log
     to_trim, start_idx, end_idx = extract_trim_from_marker_based(file_path)
-    if to_trim:
-        trim_points = points[:, :, start_idx:end_idx]
-    else:
-        trim_points = points
+    trim_points = points[:, :, start_idx:end_idx]
 
     # filter and resample
     filtered_points = filter_point_data_with_nan_segments(points=trim_points,
@@ -149,7 +146,7 @@ def pre_processed_marker_based_files(file_path: Path, output_folder: Path):
     exported_c3d_path =  output_folder / f"{file_path.stem}.c3d"
     name_points = c3d['parameters']['POINT']['LABELS']['value']
     
-    write_new_c3d(resampled_points, name_points, target_fps, str(output_folder / f"{file_name}.c3d")) 
+    write_new_c3d(resampled_points, name_points, target_fps, str(output_folder / f"{file_name}")) 
 
 
 def pre_processed_marker_less_folder(folder_marker_based: Path, folder_markerless_to_correct: Path, folder_marker_less_to_export: Path,
@@ -206,6 +203,7 @@ def pre_processed_marker_less_files(ml_trial_path: Path, mb_trial_path: Path, ou
     
     # remove NaN from the markerless trial
     c3d_ml, points_ml, fq_ml, name_points = load_c3d(ml_trial_path)
+    c3d_mb, points_mb, fq_mb, name_points_mb = load_c3d(mb_trial_path)
 
     # Remove [0,0,0] in markers and replace them with NaN
     if remove_nan:
@@ -224,12 +222,12 @@ def pre_processed_marker_less_files(ml_trial_path: Path, mb_trial_path: Path, ou
 
     # extract from the markerbased trial the cut of the markerless trial
     to_trim, start_idx, end_idx = extract_trim_from_marker_based(mb_trial_path)
-    # TODO : CHECK if the trim is at the same frame rate.
-    if to_trim is None:
-        print(f"❌ No 'begin' and 'end' events found for {trial_name}. Skipping trimming.")
-        points_ml_trimmed = points_ml_filtered
-    else:
-        points_ml_trimmed = points_ml_filtered[:, :, start_idx:end_idx]
+    # calculate the ratio of the frame rates of the two c3d files
+    ratio = fq_mb / fq_ml
+    ratio_rounded = round(ratio)
+    start_idx = int(start_idx / ratio_rounded)
+    end_idx = int(end_idx / ratio_rounded)
+    points_ml_trimmed = points_ml_filtered[:, :, start_idx:end_idx]
 
     write_new_c3d(points_ml_trimmed, name_points, fq_ml, str(output_subject_folder / f"{trial_name}.c3d"))
 
@@ -238,10 +236,6 @@ def fusion_markerless_model(path_synthpose:Path, path_rtmpose: list, path_export
     """
     Fusion of the markerless data from different models into one file.
     """
-    # path_synthpose = Path(r".\Data\ABCDE_1920px\huggingpose_hdf5")
-    # path_rtmpose = Path(r".\Data\ABCDE_1920px\all_body_rtm_coktail_14_hdf5")
-    # path_export = Path(r".\Data\ABCDE_1920px\huggingpose_hdf5_with_rtmpose")
-
 
     list_points_RTMPOSE = ["L_elbow","L_base_hand","L_MCP_thumb","L_MCP_index","L_MCP_middle","L_MCP_ring","L_MCP_little",
                         "R_elbow","R_base_hand","R_MCP_thumb","R_MCP_index","R_MCP_middle","R_MCP_ring","R_MCP_little"]

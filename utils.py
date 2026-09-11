@@ -119,6 +119,10 @@ def extract_trim_from_marker_based(path_c3d):
 
     start_idx = 0
     end_idx = n_frames
+    # check if the end_idx is even, if not, take the previous even frame (to avoid having a frame with no data)
+    if end_idx % 2 != 0:    
+        end_idx -= 1
+    # to allow synchronisation with data with a half frame rate.     
     has_begin = False
     has_end = False
     begin_frame = None
@@ -151,12 +155,19 @@ def extract_trim_from_marker_based(path_c3d):
     # Sanity check for valid indices
     if start_idx >= end_idx:
         start_idx = 0
-        end_idx = n_frames
+        end_idx = n_frames       
         has_begin = False
         has_end = False
         begin_frame = None
         end_frame = None
     to_trim = has_begin or has_end
+
+    # check if the start_idx is even, if not, take the next even frame (to avoid having a frame with no data)
+    if start_idx % 2 != 0:
+        start_idx += 1
+    # check if the end_idx is even, if not, take the previous even frame (to avoid having a frame with no data)
+    if end_idx % 2 != 0:
+        end_idx -= 1
 
     return to_trim, start_idx, end_idx
 
