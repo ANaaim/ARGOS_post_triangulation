@@ -23,7 +23,9 @@ def transforms_zero_to_nan(point_data):
     return transformed_data
 
 
-def resample_point_data(point_data: np.ndarray, original_frame_rate: float, target_frame_rate: float):
+def resample_point_data(point_data: np.ndarray,
+                        original_frame_rate: float,
+                        target_frame_rate: float):
     """
     Resamples the point data from the original frame rate to the target frame rate.
 
@@ -42,7 +44,7 @@ def resample_point_data(point_data: np.ndarray, original_frame_rate: float, targ
         Resampled point data matrix.
     """
     # Calculate the resampling factor (should be an integer)
-    resample_factor = int(target_frame_rate / original_frame_rate)
+    resample_factor = int(original_frame_rate/target_frame_rate)
 
     # Downsample matrix by keeping every N-th frame along the time axis (axis 2)
     resampled_data = point_data[:, :, ::resample_factor]
@@ -159,6 +161,16 @@ def extract_trim_from_marker_based(path_c3d):
     return to_trim, start_idx, end_idx
 
 
+def load_c3d(path: Path):
+    c3d = ezc3d.c3d(str(path))
+    return (
+        c3d,
+        c3d["data"]["points"],
+        c3d["parameters"]["POINT"]["RATE"]["value"][0],
+        c3d["parameters"]["POINT"]["LABELS"]["value"]
+    )
+
+
 def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, output_path: Path):
     """
     Write a new C3D file with the given points, point names, and frame rate.
@@ -173,9 +185,99 @@ def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, out
 
     # Fill it with random data
     c3d["parameters"]["POINT"]["UNITS"]["value"] = ["mm"]
-    c3d["parameters"]["POINT"]["RATE"]["value"] = fq_new_file
+    c3d["parameters"]["POINT"]["RATE"]["value"] = [fq_new_file]
     c3d["parameters"]["POINT"]["LABELS"]["value"] = name_points
     c3d["data"]["points"] = points
 
     # Save the new C3D file
     c3d.write(str(output_path))
+
+
+import numpy as np
+import pandas as pd
+from scipy.signal import butter, sosfiltfilt
+
+
+def filter_point_data_with_nan_segments(
+    points,
+    fs,
+    cutoff=6.0,
+    order=4,
+    max_gap=10,
+):
+    """
+    Parameters
+    ----------
+    points : ndarray
+        Shape (4, n_markers, n_frames)
+    fs : float
+        Sampling frequency
+    cutoff : float
+        Butterworth cutoff frequency
+    order : int
+        Butterworth order
+    max_gap : int
+        Fill only gaps shorter than this number of frames
+    """
+
+    filtered = points.copy()
+
+    sos = butter(
+        order,
+        cutoff,
+        btype="low",
+        fs=fs,
+        output="sos"
+    )
+
+    n_markers = points.shape[1]
+
+    for marker in range(n_markers):
+
+        for dim in range(3):
+
+            x = points[dim, marker, :].astype(float)
+
+            # ------------------------
+            # Fill only short gaps
+            # ------------------------
+            x_interp = (
+                pd.Series(x)
+                .interpolate(
+                    method="linear",
+                    limit=max_gap,
+                    limit_direction="both"
+                )
+                .to_numpy()
+            )
+
+            # Remaining NaNs = long gaps
+            valid = ~np.isnan(x_interp)
+
+            changes = np.diff(
+                np.r_[False, valid, False].astype(int)
+            )
+
+            starts = np.where(changes == 1)[0]
+            ends = np.where(changes == -1)[0]
+
+            y = np.full_like(x_interp, np.nan)
+
+            for start, end in zip(starts, ends):
+
+                segment = x_interp[start:end]
+
+                padlen = 3 * (2 * len(sos) + 1)
+
+                if len(segment) < padlen+1:
+                    y[start:end] = segment
+                    continue
+
+                y[start:end] = sosfiltfilt(
+                    sos,
+                    segment
+                )
+
+            filtered[dim, marker, :] = y
+
+    return filtered
