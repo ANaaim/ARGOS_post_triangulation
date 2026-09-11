@@ -2,7 +2,7 @@ from scipy.signal import butter, sosfiltfilt
 import numpy as np
 import ezc3d
 from pathlib import Path
-
+import pandas as pd
 
 def transforms_zero_to_nan(point_data):
     """
@@ -191,11 +191,6 @@ def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, out
 
     # Save the new C3D file
     c3d.write(str(output_path))
-
-
-import numpy as np
-import pandas as pd
-from scipy.signal import butter, sosfiltfilt
 
 
 def filter_point_data_with_nan_segments(
