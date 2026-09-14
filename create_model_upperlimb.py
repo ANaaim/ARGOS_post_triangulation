@@ -64,12 +64,6 @@ def model_creation_from_measured_data(
     reduced_model.segments["Thorax"].add_marker(Marker("C7", is_technical=True, is_anatomical=True))
     reduced_model.segments["Thorax"].add_marker(Marker("T10", is_technical=True, is_anatomical=True))
 
-    R_GH = lambda m, bio: SegmentCoordinateSystemUtils.mean_markers(["R_AC"])(static_trial.values, None) - np.array(
-        [0.0, 0.00, 0.01, 0.0]
-    )
-    L_GH = lambda m, bio: SegmentCoordinateSystemUtils.mean_markers(["L_AC"])(static_trial.values, None) - np.array(
-        [0.0, 0.00, 0.01, 0.0]
-    )
 
     reduced_model.add_segment(
         Segment(
@@ -78,9 +72,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.X,
             dof_names=["R_Shoulder_AddAbd"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=R_GH,
+                origin="R_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end=L_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end="R_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="R_EM", end="R_EL"),
                 axis_to_keep=Axis.Name.Y,
@@ -95,9 +89,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.Z,
             dof_names=["R_Shoulder_FleExt"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=R_GH,
+                origin="R_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end=R_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end="R_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="R_EM", end="R_EL"),
                 axis_to_keep=Axis.Name.Y,
@@ -112,9 +106,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.Y,
             dof_names=["R_Shoulder_Rot"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=R_GH,
+                origin="R_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end=R_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["R_EL", "R_EM"]), end="R_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="R_EM", end="R_EL"),
                 axis_to_keep=Axis.Name.Y,
@@ -209,9 +203,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.X,
             dof_names=["L_Shoulder_AddAbd"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=L_GH,
+                origin="L_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end=L_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end="L_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="L_EL", end="L_EM"),
                 axis_to_keep=Axis.Name.Y,
@@ -226,9 +220,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.Z,
             dof_names=["L_Shoulder_FleExt"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=L_GH,
+                origin="L_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end=L_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end="L_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="L_EL", end="L_EM"),
                 axis_to_keep=Axis.Name.Y,
@@ -243,9 +237,9 @@ def model_creation_from_measured_data(
             rotations=Rotations.Y,
             dof_names=["L_Shoulder_Rot"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=L_GH,
+                origin="L_GH",
                 first_axis=Axis(
-                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end=L_GH
+                    name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["L_EL", "L_EM"]), end="L_GH"
                 ),
                 second_axis=Axis(name=Axis.Name.Z, start="L_EL", end="L_EM"),
                 axis_to_keep=Axis.Name.Y,
