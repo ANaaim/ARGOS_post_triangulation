@@ -193,27 +193,23 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
     mid_end = (get_marker("IJ") + get_marker("C7")) / 2.0
     mid_start = (get_marker("PX") + get_marker("T10")) / 2.0
 
+    Z_thorax = mid_end - mid_start
+    Z_thorax /= np.linalg.norm(Z_thorax, axis=0)
     # Bi-acromial distance & Glenohumeral Joint Centers (Rab 2002)
     R_AC = get_marker("R_AC")
     L_AC = get_marker("L_AC")
     D_all = np.linalg.norm(R_AC[:3, :] - L_AC[:3, :], axis=0)
     D = np.mean(D_all)
 
-    z_offset = 0.12 * D
-    y_offset = 0.14 * D
 
     R_GH = np.ones((4, n_frames))
     L_GH = np.ones((4, n_frames))
 
     # Right shoulder center
-    R_GH[0, :] = R_AC[0, :]
-    R_GH[1, :] = R_AC[1, :] - y_offset
-    R_GH[2, :] = R_AC[2, :] - z_offset
+    R_GH = R_AC.copy() - Z_thorax * (0.17 * D)
 
     # Left shoulder center
-    L_GH[0, :] = L_AC[0, :]
-    L_GH[1, :] = L_AC[1, :] + y_offset
-    L_GH[2, :] = L_AC[2, :] - z_offset
+    L_GH = L_AC.copy() - Z_thorax * (0.17 * D)
 
     return R_GH, L_GH
 
