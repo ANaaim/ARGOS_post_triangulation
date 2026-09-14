@@ -51,6 +51,9 @@ def pre_process_marker_less_data():
 
 
 if __name__ == "__main__":
+    # calculate time of processing
+    import time
+    start_time = time.time()
     # Pre process the marker based data
     pre_process_marker_based_data()
     # Pre process the marker less data
@@ -63,5 +66,7 @@ if __name__ == "__main__":
     fusion_model(path_synthpose = pp_marker_less_folder / "SynthRTMPose",
                             path_rtmpose = pp_marker_based_folder,
                             path_export= pp_marker_less_folder / "SynthRTMPoseMB_Marker")
+    stop_time = time.time()
+    print(f"Total processing time: {stop_time - start_time:.2f} seconds")
 
 
