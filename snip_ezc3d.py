@@ -30,6 +30,7 @@ def add_point_in_c3d(filename, new_filename, new_point_name, position):
     # save the modified c3d file in the same directory with a new name
     c3d.write(new_filename)
 
+
 def get_points_ezc3d(acq):
     """Points extraction with a dictionnary allowing to find
     the point position in the numpy array using text without
@@ -76,7 +77,6 @@ def add_point_from_dictionary(acq, point_to_add):
     acq["data"]["points"] = new_array
 
     return acq
-
 
 
 if __name__ == "__main__":

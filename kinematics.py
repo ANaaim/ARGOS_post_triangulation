@@ -17,15 +17,14 @@ def main(filename, model_name, show: bool = True, filename_output=None):
     for ind, name in enumerate(name_dofs):
         dict_dof[name] = ind
 
-
     markerNames = [model.markerNames()[i].to_string() for i in range(len(model.markerNames()))]
     markers = trial.get_position(markerNames)[:3, :, :]
     check_nan = np.isnan(markers)
     # check wich frame have NaN values in the markers
     frames_with_nan = np.any(check_nan, axis=(0, 1))
-    # transform the markers to remove the NaN values by removing the value 
+    # transform the markers to remove the NaN values by removing the value
     markers_no_nan = markers[:, :, ~frames_with_nan]
-    #bounds = np.array([[-np.pi] * model.nbQ(), [np.pi] * model.nbQ()])
+    # bounds = np.array([[-np.pi] * model.nbQ(), [np.pi] * model.nbQ()])
     IK = biorbd.InverseKinematics(model, markers_no_nan)
     # IK.bounds = bounds
     q_recons = IK.solve(method="trf")

@@ -28,7 +28,11 @@ from pathlib import Path
 
 
 def model_creation_from_measured_data(
-    static_trial_path: Path, model_name: str, side_to_process: str, two_dof_hand_model: bool = False, animate_model: bool = True
+    static_trial_path: Path,
+    model_name: str,
+    side_to_process: str,
+    two_dof_hand_model: bool = False,
+    animate_model: bool = True,
 ):
 
     static_trial = C3dData(str(static_trial_path))
@@ -120,7 +124,9 @@ def model_creation_from_measured_data(
         reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_EM", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_EL", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_Up_tech_arm", is_technical=True, is_anatomical=True))
-        reduced_model.segments["R_Humerus_3"].add_marker(Marker("R_Med_tech_arm", is_technical=True, is_anatomical=True))
+        reduced_model.segments["R_Humerus_3"].add_marker(
+            Marker("R_Med_tech_arm", is_technical=True, is_anatomical=True)
+        )
 
         reduced_model.add_segment(
             Segment(
@@ -251,7 +257,9 @@ def model_creation_from_measured_data(
         reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_EM", is_technical=True, is_anatomical=True))
         reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_EL", is_technical=True, is_anatomical=True))
         reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_tech_up_arm", is_technical=True, is_anatomical=True))
-        reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_tech_med_arm", is_technical=True, is_anatomical=True))
+        reduced_model.segments["L_Humerus_3"].add_marker(
+            Marker("L_tech_med_arm", is_technical=True, is_anatomical=True)
+        )
 
         reduced_model.add_segment(
             Segment(

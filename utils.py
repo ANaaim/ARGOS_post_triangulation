@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 from tkinter import Tk, filedialog
 
+
 def transforms_zero_to_nan(point_data):
     """
     Transforms all [0, 0, 0] points in the point data to NaN.
@@ -23,16 +24,17 @@ def transforms_zero_to_nan(point_data):
 
     return transformed_data
 
+
 def XYZ_to_ZXY(points_data: np.ndarray):
     """
-    Reorders the coordinate system of the point data from (X, Y, Z) to (Z, X, Y) to allow markerless data to beoriented in the same 
+    Reorders the coordinate system of the point data from (X, Y, Z) to (Z, X, Y) to allow markerless data to beoriented in the same
     way as the marker-based data.
 
     Parameters
     ----------
     point : np.ndarray
         Array of shape (4, n_markers, n_frames) representing the point data.
-    
+
     Returns
     -------
     point_data_reoriented : np.ndarray
@@ -44,9 +46,8 @@ def XYZ_to_ZXY(points_data: np.ndarray):
 
     return point_data_reoriented
 
-def resample_point_data(point_data: np.ndarray,
-                        original_frame_rate: float,
-                        target_frame_rate: float):
+
+def resample_point_data(point_data: np.ndarray, original_frame_rate: float, target_frame_rate: float):
     """
     Resamples the point data from the original frame rate to the target frame rate.
 
@@ -65,12 +66,13 @@ def resample_point_data(point_data: np.ndarray,
         Resampled point data matrix.
     """
     # Calculate the resampling factor (should be an integer)
-    resample_factor = int(original_frame_rate/target_frame_rate)
+    resample_factor = int(original_frame_rate / target_frame_rate)
 
     # Downsample matrix by keeping every N-th frame along the time axis (axis 2)
     resampled_data = point_data[:, :, ::resample_factor]
 
     return resampled_data
+
 
 def extract_trim_from_marker_based(path_c3d):
     """Trims 3D point data based on 'begin' and 'end' events, appends the trim
@@ -95,9 +97,9 @@ def extract_trim_from_marker_based(path_c3d):
     start_idx = 0
     end_idx = n_frames
     # check if the end_idx is even, if not, take the previous even frame (to avoid having a frame with no data)
-    if end_idx % 2 != 0:    
+    if end_idx % 2 != 0:
         end_idx -= 1
-    # to allow synchronisation with data with a half frame rate.     
+    # to allow synchronisation with data with a half frame rate.
     has_begin = False
     has_end = False
     begin_frame = None
@@ -130,7 +132,7 @@ def extract_trim_from_marker_based(path_c3d):
     # Sanity check for valid indices
     if start_idx >= end_idx:
         start_idx = 0
-        end_idx = n_frames       
+        end_idx = n_frames
         has_begin = False
         has_end = False
         begin_frame = None
@@ -153,7 +155,7 @@ def load_c3d(path: Path):
         c3d,
         c3d["data"]["points"],
         c3d["parameters"]["POINT"]["RATE"]["value"][0],
-        c3d["parameters"]["POINT"]["LABELS"]["value"]
+        c3d["parameters"]["POINT"]["LABELS"]["value"],
     )
 
 
@@ -178,12 +180,14 @@ def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, out
     # Save the new C3D file
     c3d.write(str(output_path))
 
+
 def calculate_RAB(point_data: np.ndarray, name_point_list: list):
     # TODO: to make more clear
     # 1. Extract marker labels list from the C3D object
     all_labels = [label.strip() for label in name_point_list]
 
     n_frames = point_data.shape[2]
+
     # Helper function to get marker coordinates safely
     def get_marker(label_name):
         return point_data[0:4, all_labels.index(label_name), :]
@@ -201,7 +205,6 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
     L_AC = get_marker("L_AC")
     D_all = np.linalg.norm(R_AC[:3, :] - L_AC[:3, :], axis=0)
     D = np.mean(D_all)
-
 
     R_GH = np.ones((4, n_frames))
     L_GH = np.ones((4, n_frames))
@@ -239,13 +242,7 @@ def filter_point_data_with_nan_segments(
 
     filtered = points.copy()
 
-    sos = butter(
-        order,
-        cutoff,
-        btype="low",
-        fs=fs,
-        output="sos"
-    )
+    sos = butter(order, cutoff, btype="low", fs=fs, output="sos")
 
     n_markers = points.shape[1]
 
@@ -258,22 +255,12 @@ def filter_point_data_with_nan_segments(
             # ------------------------
             # Fill only short gaps
             # ------------------------
-            x_interp = (
-                pd.Series(x)
-                .interpolate(
-                    method="linear",
-                    limit=max_gap,
-                    limit_direction="both"
-                )
-                .to_numpy()
-            )
+            x_interp = pd.Series(x).interpolate(method="linear", limit=max_gap, limit_direction="both").to_numpy()
 
             # Remaining NaNs = long gaps
             valid = ~np.isnan(x_interp)
 
-            changes = np.diff(
-                np.r_[False, valid, False].astype(int)
-            )
+            changes = np.diff(np.r_[False, valid, False].astype(int))
 
             starts = np.where(changes == 1)[0]
             ends = np.where(changes == -1)[0]
@@ -286,26 +273,23 @@ def filter_point_data_with_nan_segments(
 
                 padlen = 3 * (2 * len(sos) + 1)
 
-                if len(segment) < padlen+1:
+                if len(segment) < padlen + 1:
                     y[start:end] = segment
                     continue
 
-                y[start:end] = sosfiltfilt(
-                    sos,
-                    segment
-                )
+                y[start:end] = sosfiltfilt(sos, segment)
 
             filtered[dim, marker, :] = y
 
     return filtered
+
 
 def choose_file():
     root = Tk()
     root.withdraw()  # cache la fenêtre principale
 
     filename = filedialog.askopenfilename(
-        title="Choisir un fichier NPY",
-        filetypes=[("NumPy files", "*.npy"), ("All files", "*.*")]
+        title="Choisir un fichier NPY", filetypes=[("NumPy files", "*.npy"), ("All files", "*.*")]
     )
 
     root.destroy()

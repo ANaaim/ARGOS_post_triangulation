@@ -31,7 +31,11 @@ from pathlib import Path
 
 
 def model_creation_from_measured_data(
-    static_trial_path: Path, model_name: str, side_to_process: str, two_dof_hand_model: bool = False, animate_model: bool = True
+    static_trial_path: Path,
+    model_name: str,
+    side_to_process: str,
+    two_dof_hand_model: bool = False,
+    animate_model: bool = True,
 ):
 
     static_trial = C3dData(str(static_trial_path))
@@ -49,10 +53,10 @@ def model_creation_from_measured_data(
             rotations=Rotations.XYZ,
             dof_names=["Thorax_TX", "Thorax_TY", "Thorax_TZ", "Thorax_RX", "Thorax_RY", "Thorax_RZ"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=SegmentCoordinateSystemUtils.mean_markers(["C7","sternum"]),
+                origin=SegmentCoordinateSystemUtils.mean_markers(["C7", "sternum"]),
                 first_axis=Axis(
                     name=Axis.Name.Y,
-                    start= "T11",
+                    start="T11",
                     end="C7",
                 ),
                 second_axis=Axis(name=Axis.Name.X, start="C7", end="sternum"),
@@ -76,7 +80,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -93,7 +99,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -110,7 +118,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -150,7 +160,7 @@ def model_creation_from_measured_data(
                 parent_name="R_Forearm_1",
                 rotations=Rotations.Y,
                 dof_names=["R_Forearm_ProSup"],
-                #q_ranges=RangeOfMotion(range_type=Ranges.Q, min_bound=[0], max_bound=[np.pi]),
+                # q_ranges=RangeOfMotion(range_type=Ranges.Q, min_bound=[0], max_bound=[np.pi]),
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
                     first_axis=Axis(
@@ -161,7 +171,7 @@ def model_creation_from_measured_data(
                     second_axis=Axis(name=Axis.Name.Z, start="R_MCP_little", end="R_MCP_index"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                #mesh=Mesh(("r_lwrist", "r_mwrist"), is_local=False),
+                # mesh=Mesh(("r_lwrist", "r_mwrist"), is_local=False),
             )
         )
         reduced_model.segments["R_Forearm_2"].add_marker(Marker("R_base_hand", is_technical=True, is_anatomical=False))
@@ -192,7 +202,7 @@ def model_creation_from_measured_data(
                 mesh=Mesh(("R_base_hand", "R_MCP_little", "R_MCP_index"), is_local=False),
             )
         )
-        #reduced_model.segments["R_Hand"].add_marker(Marker("R_base_hand", is_technical=True, is_anatomical=True))
+        # reduced_model.segments["R_Hand"].add_marker(Marker("R_base_hand", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Hand"].add_marker(Marker("R_MCP_index", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Hand"].add_marker(Marker("R_MCP_middle", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Hand"].add_marker(Marker("R_MCP_ring", is_technical=True, is_anatomical=True))
@@ -208,7 +218,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -225,7 +237,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -242,7 +256,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -293,10 +309,10 @@ def model_creation_from_measured_data(
                     second_axis=Axis(name=Axis.Name.Z, start="L_MCP_index", end="L_MCP_little"),
                     axis_to_keep=Axis.Name.Y,
                 ),
-                #mesh=Mesh(("r_lwrist", "r_mwrist"), is_local=False),
+                # mesh=Mesh(("r_lwrist", "r_mwrist"), is_local=False),
             )
         )
-        #reduced_model.segments["R_Forearm_2"].add_marker(Marker("R_base_hand", is_technical=True, is_anatomical=False))
+        # reduced_model.segments["R_Forearm_2"].add_marker(Marker("R_base_hand", is_technical=True, is_anatomical=False))
         if two_dof_hand_model:
             rotation_hand = Rotations.ZX
             dof_names_hand = ["L_Wrist_FleExt", "L_Wrist_Dev"]

@@ -6,7 +6,6 @@ from pathlib import Path
 from utils import choose_file
 
 
-
 def visualize(npy_file):
 
     data = np.load(npy_file, allow_pickle=True).item()
@@ -24,17 +23,14 @@ def visualize(npy_file):
     print(model_name)
     print(type(model_name))
 
-    markerNames = [
-        model.markerNames()[i].to_string()
-        for i in range(len(model.markerNames()))
-    ]
+    markerNames = [model.markerNames()[i].to_string() for i in range(len(model.markerNames()))]
     markers = trial.get_position(markerNames)[:3, :, :]
 
     nb_frames = q.shape[1]
     t_span = np.linspace(0, 10, nb_frames)
 
     model_rerun = BiorbdModel(model_name)
-    
+
     print("Model path:", model_name)
     print("Model stem:", Path(model_name).stem)
 
@@ -56,7 +52,7 @@ if __name__ == "__main__":
 
     import sys
 
-    if len(sys.argv) >1:
+    if len(sys.argv) > 1:
         npy_file = sys.argv[1]
     else:
         npy_file = choose_file()

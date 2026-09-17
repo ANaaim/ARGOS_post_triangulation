@@ -29,9 +29,14 @@ from biobuddy import (
 )
 from pathlib import Path
 
+
 # the option two dof hand is just here to ease the comparison and the bactch processing with other model with the hand
 def model_creation_from_measured_data(
-    static_trial_path: Path, model_name: str, side_to_process: str, two_dof_hand_model: bool = False, animate_model: bool = True
+    static_trial_path: Path,
+    model_name: str,
+    side_to_process: str,
+    two_dof_hand_model: bool = False,
+    animate_model: bool = True,
 ):
 
     static_trial = C3dData(str(static_trial_path))
@@ -49,10 +54,10 @@ def model_creation_from_measured_data(
             rotations=Rotations.XYZ,
             dof_names=["Thorax_TX", "Thorax_TY", "Thorax_TZ", "Thorax_RX", "Thorax_RY", "Thorax_RZ"],
             segment_coordinate_system=SegmentCoordinateSystem(
-                origin=SegmentCoordinateSystemUtils.mean_markers(["C7","sternum"]),
+                origin=SegmentCoordinateSystemUtils.mean_markers(["C7", "sternum"]),
                 first_axis=Axis(
                     name=Axis.Name.Y,
-                    start= "T11",
+                    start="T11",
                     end="C7",
                 ),
                 second_axis=Axis(name=Axis.Name.X, start="T11", end="sternum"),
@@ -79,7 +84,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -96,7 +103,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -113,7 +122,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="R_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]), end="R_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["r_lelbow", "r_melbow"]),
+                        end="R_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="r_melbow", end="r_lelbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -170,7 +181,6 @@ def model_creation_from_measured_data(
         reduced_model.segments["R_Forearm_2"].add_marker(Marker("r_lwrist", is_technical=True, is_anatomical=True))
         reduced_model.segments["R_Forearm_2"].add_marker(Marker("r_mwrist", is_technical=True, is_anatomical=True))
 
-
     if "left" in side_to_process:
         reduced_model.add_segment(
             Segment(
@@ -181,7 +191,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -198,7 +210,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -215,7 +229,9 @@ def model_creation_from_measured_data(
                 segment_coordinate_system=SegmentCoordinateSystem(
                     origin="L_Shoulder",
                     first_axis=Axis(
-                        name=Axis.Name.Y, start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]), end="L_Shoulder"
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                        end="L_Shoulder",
                     ),
                     second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
                     axis_to_keep=Axis.Name.Y,
@@ -228,47 +244,47 @@ def model_creation_from_measured_data(
         reduced_model.segments["L_Humerus_3"].add_marker(Marker("l_lelbow", is_technical=True, is_anatomical=True))
 
         reduced_model.add_segment(
-                Segment(
-                    name="L_Forearm_1",
-                    parent_name="L_Humerus_3",
-                    rotations=Rotations.Z,
-                    dof_names=["L_Elbow_FleExt"],
-                    segment_coordinate_system=SegmentCoordinateSystem(
-                        origin=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
-                        first_axis=Axis(
-                            name=Axis.Name.Y,
-                            start=SegmentCoordinateSystemUtils.mean_markers(["l_lwrist", "l_mwrist"]),
-                            end=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
-                        ),
-                        second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
-                        axis_to_keep=Axis.Name.Z,
+            Segment(
+                name="L_Forearm_1",
+                parent_name="L_Humerus_3",
+                rotations=Rotations.Z,
+                dof_names=["L_Elbow_FleExt"],
+                segment_coordinate_system=SegmentCoordinateSystem(
+                    origin=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                    first_axis=Axis(
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lwrist", "l_mwrist"]),
+                        end=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
                     ),
-                    mesh=Mesh(("l_lelbow", "l_melbow"), is_local=False),
-                )
+                    second_axis=Axis(name=Axis.Name.Z, start="l_lelbow", end="l_melbow"),
+                    axis_to_keep=Axis.Name.Z,
+                ),
+                mesh=Mesh(("l_lelbow", "l_melbow"), is_local=False),
             )
+        )
         reduced_model.segments["L_Forearm_1"].add_marker(Marker("l_lelbow", is_technical=True, is_anatomical=True))
         reduced_model.segments["L_Forearm_1"].add_marker(Marker("l_melbow", is_technical=True, is_anatomical=True))
-        
+
         reduced_model.add_segment(
-                Segment(
-                    name="L_Forearm_2",
-                    parent_name="L_Forearm_1",
-                    rotations=Rotations.Y,
-                    q_ranges=RangeOfMotion(range_type=Ranges.Q, min_bound=[0], max_bound=[np.pi]),
-                    dof_names=["L_Forearm_ProSup"],
-                    segment_coordinate_system=SegmentCoordinateSystem(
-                        origin=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
-                        first_axis=Axis(
-                            name=Axis.Name.Y,
-                            start=SegmentCoordinateSystemUtils.mean_markers(["l_lwrist", "l_mwrist"]),
-                            end=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
-                        ),
-                        second_axis=Axis(name=Axis.Name.Z, start="l_lwrist", end="l_mwrist"),
-                        axis_to_keep=Axis.Name.Y,
+            Segment(
+                name="L_Forearm_2",
+                parent_name="L_Forearm_1",
+                rotations=Rotations.Y,
+                q_ranges=RangeOfMotion(range_type=Ranges.Q, min_bound=[0], max_bound=[np.pi]),
+                dof_names=["L_Forearm_ProSup"],
+                segment_coordinate_system=SegmentCoordinateSystem(
+                    origin=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
+                    first_axis=Axis(
+                        name=Axis.Name.Y,
+                        start=SegmentCoordinateSystemUtils.mean_markers(["l_lwrist", "l_mwrist"]),
+                        end=SegmentCoordinateSystemUtils.mean_markers(["l_lelbow", "l_melbow"]),
                     ),
-                    mesh=Mesh(("l_lwrist", "l_mwrist"), is_local=False),
-                )
+                    second_axis=Axis(name=Axis.Name.Z, start="l_lwrist", end="l_mwrist"),
+                    axis_to_keep=Axis.Name.Y,
+                ),
+                mesh=Mesh(("l_lwrist", "l_mwrist"), is_local=False),
             )
+        )
         reduced_model.segments["L_Forearm_2"].add_marker(Marker("l_lwrist", is_technical=True, is_anatomical=True))
         reduced_model.segments["L_Forearm_2"].add_marker(Marker("l_mwrist", is_technical=True, is_anatomical=True))
 
@@ -281,14 +297,15 @@ def model_creation_from_measured_data(
 
     return model_real
 
+
 if __name__ == "__main__":
     static_file_path = Path(r".\Data\ABCDE_1920px\huggingpose_hdf5_with_rtmpose\Sujet_008\00-static-stand.c3d")
     dynamic_file_path = Path(r".\Data\ABCDE_1920px\huggingpose_hdf5_with_rtmpose\Sujet_008\03-open-bottle.c3d")
     show_animation = True  # Set to True if you want to visualize the kinematics results
     model_creation_from_measured_data(static_file_path, model_name=r"toto_Synthpose", animate_model=True)
     kinematics.main(
-                str(dynamic_file_path),
-                str("toto_Synthpose.biomod"),
-                show=show_animation,  # Set True if you want to visualize the kinematics results
-                filename_output=str("toto_Synthpose.csv"),
-            )
+        str(dynamic_file_path),
+        str("toto_Synthpose.biomod"),
+        show=show_animation,  # Set True if you want to visualize the kinematics results
+        filename_output=str("toto_Synthpose.csv"),
+    )
