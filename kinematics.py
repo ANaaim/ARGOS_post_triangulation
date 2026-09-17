@@ -34,7 +34,9 @@ def main(filename, model_name, show: bool = True, filename_output=None):
     # find all the keys of dict_dof
     # reposition all the point considering that some were removed because of NaN values, so we need to add the NaN values back to the q_recons array
     q_recons_full = np.full((model.nbQ(), nb_frames), np.nan)
+    q_visualisation = np.zeros((model.nbQ(), nb_frames), np.float64)
     q_recons_full[:, ~frames_with_nan] = q_recons
+    q_visualisation[:, ~frames_with_nan] = q_recons
     q_2_export = q_recons_full[[dict_dof[name] for name in dict_dof.keys()]]
     # Compute time vector based on frame count and sampling frequency
     # frame = np.arange(first_frame, last_frame, dtype=int)
@@ -54,6 +56,19 @@ def main(filename, model_name, show: bool = True, filename_output=None):
 
     df.to_csv(name_csv, index=False)
     print(f"Exported kinematics to {name_csv}")
+
+    # save q_visualisation as a npy file in the same folder as the output csv file
+    if filename_output is not None:
+        np.save(
+            filename_output.replace(".csv", ".npy"),
+            {
+                "q": q_visualisation,
+                "model_path": str(Path(model_name)),
+                "filename_path": str(Path(filename)),
+            },
+            allow_pickle=True,
+        )
+        print(f"Exported kinematics to {filename_output.replace('.csv', '.npy')}")
 
     if show:
         nb_seconds = 10
