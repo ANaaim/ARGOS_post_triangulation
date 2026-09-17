@@ -2,23 +2,9 @@ from pyorerun import BiorbdModel, PhaseRerun, PyoMarkers
 import numpy as np
 from biobuddy import C3dData
 import biorbd
-from tkinter import Tk, filedialog
 from pathlib import Path
+from utils import choose_file
 
-
-
-
-def choose_file():
-    root = Tk()
-    root.withdraw()  # cache la fenêtre principale
-
-    filename = filedialog.askopenfilename(
-        title="Choisir un fichier NPY",
-        filetypes=[("NumPy files", "*.npy"), ("All files", "*.*")]
-    )
-
-    root.destroy()
-    return filename
 
 
 def visualize(npy_file):

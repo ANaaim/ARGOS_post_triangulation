@@ -3,6 +3,7 @@ import numpy as np
 import ezc3d
 from pathlib import Path
 import pandas as pd
+from tkinter import Tk, filedialog
 
 def transforms_zero_to_nan(point_data):
     """
@@ -297,3 +298,15 @@ def filter_point_data_with_nan_segments(
             filtered[dim, marker, :] = y
 
     return filtered
+
+def choose_file():
+    root = Tk()
+    root.withdraw()  # cache la fenêtre principale
+
+    filename = filedialog.askopenfilename(
+        title="Choisir un fichier NPY",
+        filetypes=[("NumPy files", "*.npy"), ("All files", "*.*")]
+    )
+
+    root.destroy()
+    return filename
