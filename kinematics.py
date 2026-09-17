@@ -29,7 +29,7 @@ def main(filename, model_name, show: bool = True, filename_output=None):
     IK = biorbd.InverseKinematics(model, markers_no_nan)
     # IK.bounds = bounds
     q_recons = IK.solve(method="trf")
-
+    sol = IK.sol()
     ## Export all kinematics in a csv file
     # find all the keys of dict_dof
     # reposition all the point considering that some were removed because of NaN values, so we need to add the NaN values back to the q_recons array
@@ -65,6 +65,7 @@ def main(filename, model_name, show: bool = True, filename_output=None):
                 "q": q_visualisation,
                 "model_path": str(Path(model_name)),
                 "filename_path": str(Path(filename)),
+                "optim_information": sol,
             },
             allow_pickle=True,
         )
