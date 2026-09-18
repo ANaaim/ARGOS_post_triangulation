@@ -84,66 +84,123 @@ def check_frame_numbers(path_marker_based: Path, path_marker_less: Path):
 
 
 def generate_missing_point_NaN_in_files(path_data: Path, is_marker_less: bool = True):
-    # For one file generate all the segment where data are NaN and create a log file with the info
+    """
+    For each C3D file, detect NaN segments marker by marker
+    and create a log file containing:
+        - marker name
+        - start frame
+        - end frame
+        - number of missing frames
+    """
+
     for subject in path_data.iterdir():
         if not subject.is_dir():
             continue
+
         subject_name = subject.name
-        if is_marker_less:
-            trials = {f.stem: f for f in (subject).glob("*.c3d")}
-        else:
-            trials = {f.stem: f for f in (subject).glob("*.c3d")}
+
+        trials = {f.stem: f for f in subject.glob("*.c3d")}
+
         # Save the missing segments to a log file
         log_file_path = subject / "missing_points_log.txt"
-        # Add the missing segments to the log file
-        with open(log_file_path, "w") as log_file:
-            log_file.write(f"Missing Points Log for {subject_name}\n")
-            for trial_name, trial_file in trials.items():
-                log_file.write(f"\nTrial: {trial_name}\n")
-                c3d, points, fq, labels = load_c3d(trial_file)
-                n_frames = points.shape[2]
-                missing_segments = []
-                current_segment = None
-                for frame_idx in range(n_frames):
-                    frame_data = points[:, :, frame_idx]
-                    if np.isnan(frame_data).any():
-                        if current_segment is None:
-                            current_segment = {"start_frame": frame_idx + 1}  # 1-based index
-                    else:
-                        if current_segment is not None:
-                            current_segment["end_frame"] = frame_idx  # 1-based index
-                            missing_segments.append(current_segment)
-                            current_segment = None
-                if current_segment is not None:
-                    current_segment["end_frame"] = n_frames  # 1-based index
-                    missing_segments.append(current_segment)
 
-                if missing_segments:
-                    print(f"Logging missing points segments for {trial_name} in {log_file_path}")
-                    log_file.write(f"Missing Points Segments for {trial_name}:\n")
-                    for segment in missing_segments:
-                        log_file.write(f"Start Frame: {segment['start_frame']}, End Frame: {segment['end_frame']}\n")
+        with open(log_file_path, "w") as log_file:
+
+            log_file.write(f"Missing Points Log for {subject_name}\n")
+
+            for trial_name, trial_file in trials.items():
+
+                log_file.write(f"\nTrial: {trial_name}\n")
+
+                c3d, points, fq, labels = load_c3d(trial_file)
+
+                n_frames = points.shape[2]
+                n_markers = points.shape[1]
+
+                trial_has_missing_data = False
+
+                # Loop through each marker independently
+                for marker_idx in range(n_markers):
+
+                    marker_name = labels[marker_idx]
+
+                    # Extract the marker trajectory
+                    # Shape expected: coordinates x frames
+                    marker_data = points[:, marker_idx, :]
+
+                    # A frame is considered missing if at least one
+                    # coordinate of the marker is NaN
+                    missing_frames = np.isnan(marker_data).any(axis=0)
+
+                    missing_segments = []
+                    current_segment = None
+
+                    for frame_idx, is_missing in enumerate(missing_frames):
+
+                        if is_missing:
+                            if current_segment is None:
+                                current_segment = {
+                                    "start_frame": frame_idx + 1
+                                }
+
+                        else:
+                            if current_segment is not None:
+                                current_segment["end_frame"] = frame_idx
+                                missing_segments.append(current_segment)
+                                current_segment = None
+
+                    # If the missing segment continues until the last frame
+                    if current_segment is not None:
+                        current_segment["end_frame"] = n_frames
+                        missing_segments.append(current_segment)
+
+                    # Write marker-specific missing segments
+                    if missing_segments:
+
+                        trial_has_missing_data = True
+
+                        log_file.write(f"\nMarker: {marker_name}\n")
+
+                        for segment in missing_segments:
+
+                            start = segment["start_frame"]
+                            end = segment["end_frame"]
+                            n_missing = end - start + 1
+
+                            log_file.write(
+                                f"  Start Frame: {start}, "
+                                f"End Frame: {end}, "
+                                f"Missing Frames: {n_missing}\n"
+                            )
+
+                if trial_has_missing_data:
+                    print(
+                        f"Logging missing points for "
+                        f"{trial_name} in {log_file_path}"
+                    )
+                else:
+                    log_file.write("No missing points detected.\n")
 
 if __name__ == "__main__":
     # Example usage
     path_marker_less = Path(".\\data\\pre_processed\\marker_less\\RTMPose")
     path_marker_based = Path(".\\data\\pre_processed\\marker_based")
-    discrepancies_presence = check_data_presence(path_marker_based, path_marker_less)
-    discrepancies_frames = check_frame_numbers(path_marker_based, path_marker_less)
+    # discrepancies_presence = check_data_presence(path_marker_based, path_marker_less)
+    # discrepancies_frames = check_frame_numbers(path_marker_based, path_marker_less)
 
     generate_missing_point_NaN_in_files(path_marker_based, is_marker_less=False)
     generate_missing_point_NaN_in_files(path_marker_less, is_marker_less=True)
 
 
-    discrepancies = {**discrepancies_presence, **discrepancies_frames}
+    # discrepancies = {**discrepancies_presence, **discrepancies_frames}
 
-    if discrepancies:
-        print("Discrepancies found:")
-        for subject, issues in discrepancies.items():
-            print(f"Subject: {subject}")
-            if issues["missing_in_marker_based"]:
-                print(f"  Missing in Marker-Based: {issues['missing_in_marker_based']}")
-            if issues["missing_in_marker_less"]:
-                print(f"  Missing in Marker-Less: {issues['missing_in_marker_less']}")
-    else:
-        print("No discrepancies found. All files are present in both folders.")
+    # if discrepancies:
+    #     print("Discrepancies found:")
+    #     for subject, issues in discrepancies.items():
+    #         print(f"Subject: {subject}")
+    #         if issues["missing_in_marker_based"]:
+    #             print(f"  Missing in Marker-Based: {issues['missing_in_marker_based']}")
+    #         if issues["missing_in_marker_less"]:
+    #             print(f"  Missing in Marker-Less: {issues['missing_in_marker_less']}")
+    # else:
+    #     print("No discrepancies found. All files are present in both folders.")
