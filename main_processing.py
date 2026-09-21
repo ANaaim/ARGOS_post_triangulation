@@ -42,7 +42,7 @@ def pre_process_marker_less_data():
         folder_marker_less_fq_corrected = pp_marker_less_folder / "ML_fq_corrected" / model
         folder_marker_less_to_export = pp_marker_less_folder / model
 
-        # correct_markerless_fq_folder(folder_marker_based, folder_markerless_to_correct, folder_marker_less_fq_corrected)
+        correct_markerless_fq_folder(folder_marker_based, folder_markerless_to_correct, folder_marker_less_fq_corrected)
 
         pre_processed_marker_less_folder(
             folder_marker_based=folder_marker_based,
