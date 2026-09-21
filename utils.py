@@ -6,7 +6,7 @@ import pandas as pd
 from tkinter import Tk, filedialog
 
 
-def transforms_zero_to_nan(point_data):
+def transforms_zero_to_nan(point_data: np.ndarray):
     """
     Transforms all [0, 0, 0] points in the point data to NaN.
 
@@ -74,7 +74,7 @@ def resample_point_data(point_data: np.ndarray, original_frame_rate: float, targ
     return resampled_data
 
 
-def extract_trim_from_marker_based(path_c3d):
+def extract_trim_from_marker_based(path_c3d: Path):
     """Trims 3D point data based on 'begin' and 'end' events, appends the trim
 
     result log message directly into the shared .txt log file, and returns
@@ -218,13 +218,13 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
     return R_GH, L_GH
 
 
+
 def filter_point_data_with_nan_segments(
-    points,
-    fs,
-    cutoff=6.0,
-    order=4,
-    max_gap=10,
-):
+    points: np.ndarray,
+    fs: float,
+    cutoff: float=6.0,
+    order: int=4,
+    max_gap: int=10):
     """
     Parameters
     ----------
