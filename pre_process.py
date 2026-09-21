@@ -10,6 +10,7 @@ from utils import (
     filter_point_data_with_nan_segments,
     XYZ_to_ZXY,
     calculate_RAB,
+    calculate_mid_point
 )
 import snip_ezc3d as snip
 
@@ -141,13 +142,31 @@ def pre_processed_marker_based_files(file_path: Path, output_folder: Path):
 
     # Calculate GH with RAB to add in the data
     R_GH, L_GH = calculate_RAB(resampled_points, labels)
+    # R_FJC and L_FJC correspond to the middle of the HM2 and HM5
+    R_EJC, L_EJC, R_WJC, L_WJC, R_FJC, L_FJC = calculate_mid_point(resampled_points, labels)
+
+    # Calculate joint centers and add them to the resampled_points
 
     exported_c3d_path = output_folder / f"{file_path.stem}.c3d"
     name_points = c3d["parameters"]["POINT"]["LABELS"]["value"]
     # Add the R_GH and L_GH to the resampled_points
     resampled_points = np.concatenate((resampled_points, R_GH[:, np.newaxis, :], L_GH[:, np.newaxis, :]), axis=1)
+    resampled_points = np.concatenate(
+        (resampled_points, 
+        R_EJC[:, np.newaxis, :],
+        L_EJC[:, np.newaxis, :], 
+        R_WJC[:, np.newaxis, :], 
+        L_WJC[:, np.newaxis, :], 
+        R_FJC[:, np.newaxis, :], 
+        L_FJC[:, np.newaxis, :]), axis=1)   
     name_points.append("R_GH")
     name_points.append("L_GH")
+    name_points.append("R_EJC")
+    name_points.append("L_EJC")
+    name_points.append("R_WJC")
+    name_points.append("L_WJC")
+    name_points.append("R_FJC")
+    name_points.append("L_FJC")
 
     write_new_c3d(resampled_points, name_points, target_fps, str(output_folder / f"{file_name}"))
 
