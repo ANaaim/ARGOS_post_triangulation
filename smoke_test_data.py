@@ -182,25 +182,43 @@ def generate_missing_point_NaN_in_files(path_data: Path, is_marker_less: bool = 
                     log_file.write("No missing points detected.\n")
 
 if __name__ == "__main__":
-    # Example usage
-    path_marker_less = Path(".\\data\\pre_processed\\marker_less\\RTMPose")
+
+    list_model_ML = ["SynthPose", "RTMPose"]
+    path_marker_less = Path(".\\data\\pre_processed\\marker_less")
     path_marker_based = Path(".\\data\\pre_processed\\marker_based")
-    # discrepancies_presence = check_data_presence(path_marker_based, path_marker_less)
-    # discrepancies_frames = check_frame_numbers(path_marker_based, path_marker_less)
+
+    if clean_folder_from_previous_run := True:
+
+        for subject in path_marker_based.iterdir():
+            if subject.is_dir():
+                log_file_path = subject / "missing_points_log.txt"
+                if log_file_path.exists():
+                    log_file_path.unlink()
+
 
     generate_missing_point_NaN_in_files(path_marker_based, is_marker_less=False)
-    generate_missing_point_NaN_in_files(path_marker_less, is_marker_less=True)
+    for model in list_model_ML:
+        path_marker_less_model = path_marker_less / model
+        print(path_marker_less_model)
+        if clean_folder_from_previous_run:
+            for subject in path_marker_less.iterdir():
+                if subject.is_dir():
+                    log_file_path = subject / "missing_points_log.txt"
+                    if log_file_path.exists():
+                        log_file_path.unlink()
+        generate_missing_point_NaN_in_files(path_marker_less_model, is_marker_less=True)
 
+        discrepancies_presence = check_data_presence(path_marker_based, path_marker_less_model)
+        discrepancies_frames = check_frame_numbers(path_marker_based, path_marker_less_model)
+        discrepancies = {**discrepancies_presence, **discrepancies_frames}
 
-    # discrepancies = {**discrepancies_presence, **discrepancies_frames}
-
-    # if discrepancies:
-    #     print("Discrepancies found:")
-    #     for subject, issues in discrepancies.items():
-    #         print(f"Subject: {subject}")
-    #         if issues["missing_in_marker_based"]:
-    #             print(f"  Missing in Marker-Based: {issues['missing_in_marker_based']}")
-    #         if issues["missing_in_marker_less"]:
-    #             print(f"  Missing in Marker-Less: {issues['missing_in_marker_less']}")
-    # else:
-    #     print("No discrepancies found. All files are present in both folders.")
+        if discrepancies:
+            print("Discrepancies found:")
+            for subject, issues in discrepancies.items():
+                print(f"Subject: {subject}")
+                if issues["missing_in_marker_based"]:
+                    print(f"  Missing in Marker-Based: {issues['missing_in_marker_based']}")
+                if issues["missing_in_marker_less"]:
+                    print(f"  Missing in Marker-Less: {issues['missing_in_marker_less']}")
+        else:
+            print("No discrepancies found. All files are present in both folders.")
