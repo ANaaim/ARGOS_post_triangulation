@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 from tkinter import Tk, filedialog
 
+from scipy.interpolate import interp1d
+from scipy.signal import butter, sosfiltfilt
 
 def transforms_zero_to_nan(point_data: np.ndarray):
     """
@@ -222,62 +224,138 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
 def filter_point_data_with_nan_segments(
     points: np.ndarray,
     fs: float,
-    cutoff: float=6.0,
-    order: int=4,
-    max_gap: int=10):
+    cutoff: float = 6.0,
+    order: int = 4,
+    max_gap: int = 10,
+) -> np.ndarray:
     """
+    Interpolate short NaN gaps and low-pass filter marker trajectories.
+
     Parameters
     ----------
-    points : ndarray
-        Shape (4, n_markers, n_frames)
+    points : np.ndarray
+        Marker trajectories with shape (4, n_markers, n_frames).
     fs : float
-        Sampling frequency
-    cutoff : float
-        Butterworth cutoff frequency
-    order : int
-        Butterworth order
-    max_gap : int
-        Fill only gaps shorter than this number of frames
+        Sampling frequency in Hz.
+    cutoff : float, optional
+        Butterworth low-pass cutoff frequency in Hz.
+    order : int, optional
+        Butterworth filter order.
+    max_gap : int, optional
+        Maximum NaN gap length, in frames, to interpolate.
+
+    Returns
+    -------
+    np.ndarray
+        Filtered marker trajectories. Long gaps remain NaN.
     """
 
     filtered = points.copy()
 
-    sos = butter(order, cutoff, btype="low", fs=fs, output="sos")
+    sos = butter(
+        order,
+        cutoff,
+        btype="low",
+        fs=fs,
+        output="sos",
+    )
 
     n_markers = points.shape[1]
+    n_frames = points.shape[2]
 
     for marker in range(n_markers):
 
         for dim in range(3):
 
             x = points[dim, marker, :].astype(float)
+            x_interp = x.copy()
 
-            # ------------------------
-            # Fill only short gaps
-            # ------------------------
-            x_interp = pd.Series(x).interpolate(method="linear", limit=max_gap, limit_direction="both").to_numpy()
+            # --------------------------------------------------
+            # Find NaN segments
+            # --------------------------------------------------
+            is_nan = np.isnan(x)
 
-            # Remaining NaNs = long gaps
+            changes = np.diff(
+                np.r_[False, is_nan, False].astype(int)
+            )
+
+            gap_starts = np.where(changes == 1)[0]
+            gap_ends = np.where(changes == -1)[0]
+
+            # --------------------------------------------------
+            # Interpolate only short internal gaps
+            # --------------------------------------------------
+            for start, end in zip(gap_starts, gap_ends):
+
+                gap_length = end - start
+
+                # Ignore gaps that are too long
+                if gap_length > max_gap:
+                    continue
+
+                # Cannot interpolate before first valid point
+                if start == 0:
+                    continue
+
+                # Cannot interpolate after last valid point
+                if end >= n_frames:
+                    continue
+
+                # Values immediately before and after the gap
+                x_known = np.array([start - 1, end])
+                y_known = np.array([
+                    x[start - 1],
+                    x[end],
+                ])
+
+                # Safety check
+                if np.isnan(y_known).any():
+                    continue
+
+                interpolator = interp1d(
+                    x_known,
+                    y_known,
+                    kind="linear",
+                )
+
+                frames_to_fill = np.arange(start, end)
+
+                x_interp[frames_to_fill] = interpolator(
+                    frames_to_fill
+                )
+
+            # --------------------------------------------------
+            # Find continuous valid segments after interpolation
+            # --------------------------------------------------
             valid = ~np.isnan(x_interp)
 
-            changes = np.diff(np.r_[False, valid, False].astype(int))
+            changes = np.diff(
+                np.r_[False, valid, False].astype(int)
+            )
 
             starts = np.where(changes == 1)[0]
             ends = np.where(changes == -1)[0]
 
             y = np.full_like(x_interp, np.nan)
 
+            # --------------------------------------------------
+            # Filter each continuous valid segment independently
+            # --------------------------------------------------
             for start, end in zip(starts, ends):
 
                 segment = x_interp[start:end]
 
                 padlen = 3 * (2 * len(sos) + 1)
 
+                # Segment too short for filtfilt
                 if len(segment) < padlen + 1:
                     y[start:end] = segment
                     continue
 
-                y[start:end] = sosfiltfilt(sos, segment)
+                y[start:end] = sosfiltfilt(
+                    sos,
+                    segment,
+                )
 
             filtered[dim, marker, :] = y
 
