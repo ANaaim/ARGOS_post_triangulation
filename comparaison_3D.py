@@ -4,7 +4,7 @@ import polars as pl
 import numpy as np
 import ezc3d
 import snip_ezc3d as snip
-
+from anatomical_frame import extract_anatomical_frame
 
 def compare_absolute_file(
         path_marker_based : Path, 
@@ -25,24 +25,27 @@ def compare_absolute_file(
     dict_error_RTM = {}
     for point_MB, point_synth in dict_Synth.items():
         if point_synth in points_name_Synth and point_MB in points_name_MB:
-            index_point_synth = points_name_Synth.index(point_synth)
-            index_point_MB = points_name_MB.index(point_MB)
-            point_data_synth = points_data_Synth[:, index_point_synth, :]
-            point_data_MB = points_data_MB[:, index_point_MB, :]
-            error = point_data_synth - point_data_MB
+            error = calculate_error_absolute(points_data_ref=points_data_MB,
+                                     points_name_ref=points_name_MB,
+                                     point_name_ref=point_MB,
+                                     points_data=points_data_Synth,
+                                     points_name=points_name_Synth,
+                                     point_name=point_synth)
             dict_error_Synth[point_MB] = error
 
     for point_MB, point_RTM in dict_RTM.items():
         if point_RTM in points_name_RTM and point_MB in points_name_MB:
-            index_point_RTM = points_name_RTM.index(point_RTM)
-            index_point_MB = points_name_MB.index(point_MB)
-            point_data_RTM = points_data_RTM[:, index_point_RTM, :]
-            point_data_MB = points_data_MB[:, index_point_MB, :]
-            error = point_data_RTM - point_data_MB
+            error = calculate_error_absolute(points_data_ref=points_data_MB,
+                                     points_name_ref=points_name_MB,
+                                     point_name_ref=point_MB,
+                                     points_data=points_data_RTM,
+                                     points_name=points_name_RTM,
+                                     point_name=point_RTM)
             dict_error_RTM[point_MB] = error
 
-
     return dict_error_Synth, dict_error_RTM
+
+
 
 def compare_anatomical_frame_file(
     path_synth: Path,
@@ -99,121 +102,19 @@ def compare_anatomical_frame_file(
 
     return dict_error_Synth, dict_error_RTM
 
-def thorax_anatomical_frame(points_data, points_name):
-    # get the index of the points in the points_name list
-    index_IJ = points_name.index("IJ")
-    index_C7 = points_name.index("C7")
-    index_T10 = points_name.index("T10")
-    index_PX = points_name.index("PX")
 
-    # get the position of the points in the points_data array
-    IJ = points_data[:, index_IJ, :]
-    C7 = points_data[:, index_C7, :]
-    T10 = points_data[:, index_T10, :]
-    PX = points_data[:, index_PX, :]
-    
-    # calculate the thorax anatomical frame
-    Y_thorax = ((IJ+C7)/2)-(PX+T10)/2
-    Y_thorax /= np.linalg.norm(Y_thorax, axis=0)
-    Z_thorax = np.cross((C7 - IJ), Y_thorax, axis=0)
-    Z_thorax /= np.linalg.norm(Z_thorax, axis=0)
-    X_thorax = np.cross(Y_thorax, Z_thorax, axis=0)
+def calculate_error_absolute(points_data_ref : np.ndarray, points_name_ref : list, point_name_ref : str,
+                             points_data: np.ndarray, points_name: list, point_name: str):
+    index_point  = points_name.index(point_name)
+    index_point_ref = points_name_ref.index(point_name_ref)
 
-    return X_thorax, Y_thorax, Z_thorax
+    point_coordinate = points_data[:, index_point, :]
+    point_ref = points_data_ref[:, index_point_ref, :]
 
-def humerus_anatomical_frame(points_data, points_name, side="R"):
-    # get the index of the points in the points_name list
-    index_GH = points_name.index(f"{side}_GH")
-    index_EL = points_name.index(f"{side}_EL")
-    index_EM = points_name.index(f"{side}_EM")
+    error = point_coordinate - point_ref
 
-    # get the position of the points in the points_data array
-    GH = points_data[:, index_GH, :]
-    EL = points_data[:, index_EL, :]
-    EM = points_data[:, index_EM, :]
+    return error
 
-    # calculate the humerus anatomical frame
-    Y_humerus = (GH-(EL+EM)/2)
-    Y_humerus /= np.linalg.norm(Y_humerus, axis=0)
-    X_humerus = np.cross(Y_humerus,(EL - EM), axis=0)
-    X_humerus /= np.linalg.norm(X_humerus, axis=0)
-    Z_humerus = np.cross(X_humerus, Y_humerus, axis=0)
-
-    if side == "L":
-        X_humerus = -X_humerus
-        Z_humerus = -Z_humerus 
-
-    return X_humerus, Y_humerus, Z_humerus
-
-def forearm_anatomical_frame(points_data, points_name, side="R"):
-    # get the index of the points in the points_name list
-    index_EL = points_name.index(f"{side}_EL")
-    index_EM = points_name.index(f"{side}_EM")
-    index_RS = points_name.index(f"{side}_RS")
-    index_US = points_name.index(f"{side}_US")
-
-    # get the position of the points in the points_data array
-    EL = points_data[:, index_EL, :]
-    EM = points_data[:, index_EM, :]
-    RS = points_data[:, index_RS, :]
-    US = points_data[:, index_US, :]
-
-    # calculate the forearm anatomical frame
-    Y_forearm = (RS+US)/2-(EL+EM)/2
-    Y_forearm /= np.linalg.norm(Y_forearm, axis=0)
-    X_forearm = np.cross(Y_forearm, (RS - US), axis=0)
-    X_forearm /= np.linalg.norm(X_forearm, axis=0)
-    Z_forearm = np.cross(X_forearm, Y_forearm, axis=0)
-
-    if side == "L":
-        X_forearm = -X_forearm
-        Z_forearm = -Z_forearm 
-
-    return X_forearm, Y_forearm, Z_forearm
-
-def hand_anatomical_frame(points_data, points_name, side="R"):
-    # get the index of the points in the points_name list
-    index_HM2 = points_name.index(f"{side}_HM2")
-    index_HM5 = points_name.index(f"{side}_HM5")
-    index_RS = points_name.index(f"{side}_RS")
-    index_US = points_name.index(f"{side}_US")
-
-    # get the position of the points in the points_data array
-    HM2 = points_data[:, index_HM2, :]
-    HM5 = points_data[:, index_HM5, :]
-    RS = points_data[:, index_RS, :]
-    US = points_data[:, index_US, :]
-
-    # calculate the hand anatomical frame
-    Y_hand = (RS+US)/2-(HM2+HM5)/2
-    Y_hand /= np.linalg.norm(Y_hand, axis=0)
-    X_hand = np.cross(Y_hand, (HM2 - HM5), axis=0)
-    X_hand /= np.linalg.norm(X_hand, axis=0)
-    Z_hand = np.cross(X_hand, Y_hand, axis=0)
-
-    if side == "L":
-        X_hand = -X_hand
-        Z_hand = -Z_hand 
-
-    return X_hand, Y_hand, Z_hand
-
-def extract_anatomical_frame(points_data, points_name, frame_to_use, side="R"):
-      # Assuming the first character indicates the side (R or L)
-    if frame_to_use == "thorax":
-        X_MB, Y_MB, Z_MB = thorax_anatomical_frame(points_data, points_name)
-    if frame_to_use == "humerus":
-        X_MB, Y_MB, Z_MB = humerus_anatomical_frame(points_data, points_name, side=side)
-    if frame_to_use == "forearm":
-        X_MB, Y_MB, Z_MB = forearm_anatomical_frame(points_data, points_name, side=side)
-    if frame_to_use == "hand":
-        X_MB, Y_MB, Z_MB = hand_anatomical_frame(points_data, points_name, side=side)
-    return X_MB, Y_MB, Z_MB
-
-def project_point_onto_frame(point_data, X_frame, Y_frame, Z_frame):
-    point_data_proj = np.array([np.einsum("ij,ij->j", point_data, X_frame),
-                                np.einsum("ij,ij->j", point_data, Y_frame),
-                                np.einsum("ij,ij->j", point_data, Z_frame),])
-    return point_data_proj
 
 def calculate_error_anatomical_frame(points_data_ref : np.ndarray, points_name_ref : list, point_name_ref : str,
                                      points_data: np.ndarray, points_name: list, point_name: str,
@@ -221,11 +122,11 @@ def calculate_error_anatomical_frame(points_data_ref : np.ndarray, points_name_r
 
     X_frame, Y_frame, Z_frame = extract_anatomical_frame(points_data_ref, points_name_ref, frame_to_use, side=side)
 
-    index_point_synth = points_name.index(point_name)
-    index_point_MB = points_name_ref.index(point_name_ref)
+    index_point  = points_name.index(point_name)
+    index_point_ref = points_name_ref.index(point_name_ref)
 
-    point_coordinate = points_data[:, index_point_synth, :]
-    point_ref = points_data_ref[:, index_point_MB, :]
+    point_coordinate = points_data[:, index_point, :]
+    point_ref = points_data_ref[:, index_point_ref, :]
 
     point_proj = project_point_onto_frame(point_coordinate, X_frame, Y_frame, Z_frame)
     point_ref_proj = project_point_onto_frame(point_ref, X_frame, Y_frame, Z_frame)
@@ -233,7 +134,6 @@ def calculate_error_anatomical_frame(points_data_ref : np.ndarray, points_name_r
     error = point_proj - point_ref_proj
 
     return error
-
 
 def error_dict_to_dataframe(
     error_dict: dict,
@@ -276,6 +176,14 @@ def error_dict_to_dataframe(
         return pl.DataFrame()
 
     return pl.concat(dfs)
+
+
+def project_point_onto_frame(point_data, X_frame, Y_frame, Z_frame):
+    point_data_proj = np.array([np.einsum("ij,ij->j", point_data, X_frame),
+                                np.einsum("ij,ij->j", point_data, Y_frame),
+                                np.einsum("ij,ij->j", point_data, Z_frame),])
+    return point_data_proj
+
 
 def main():
     path_data = Path(".\\data\\pre_processed")
