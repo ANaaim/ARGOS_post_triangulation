@@ -66,9 +66,7 @@ def compare_anatomical_frame_file(
     dict_error_RTM = {}
     for point_MB, point_synth in dict_Synth.items():
         if point_synth in points_name_Synth and point_MB in points_name_MB:
-            print(f"Comparing {point_MB} in SynthPose and Marker Based")
             frame_to_use = dict_frame_to_use[point_MB]
-            print(f"Using {frame_to_use} anatomical frame for {point_MB}")
             side = point_MB[0]
             
             error = calculate_error_anatomical_frame(points_data_ref = points_data_MB, 
@@ -84,7 +82,6 @@ def compare_anatomical_frame_file(
     for point_MB, point_RTM in dict_RTM.items():
         if point_RTM in points_name_RTM and point_MB in points_name_MB:
             frame_to_use = dict_frame_to_use[point_MB]
-            print(f"Using {frame_to_use} anatomical frame for {point_MB}")
             side = point_MB[0]
             
             # Project the point onto the thorax anatomical frame
@@ -149,13 +146,15 @@ def error_dict_to_dataframe(
 
         # error est supposé être de forme (3, n_frames)
         n_frames = error.shape[1]
-
+        # remove L_ and R_ from the point name for one of the columns to ease the analysis
+        point_short = point[2:] if point.startswith(("L_", "R_")) else point
         df = pl.DataFrame({
             "subject": [subject] * n_frames,
             "task": [task] * n_frames,
             "coordinate_system": [coordinate_system] * n_frames,
             "model": [model] * n_frames,
             "point": [point] * n_frames,
+            "point_short": [point_short] * n_frames,
             "frame": np.arange(n_frames),
             "frame_type": [dict_frame_to_use.get(point, "unknown")] * n_frames,
             "error_x": error[0, :],
