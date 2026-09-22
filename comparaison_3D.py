@@ -210,9 +210,9 @@ def extract_anatomical_frame(points_data, points_name, frame_to_use, side="R"):
     return X_MB, Y_MB, Z_MB
 
 def project_point_onto_frame(point_data, X_frame, Y_frame, Z_frame):
-    point_data_proj = np.array([np.dot(point_data.T, X_frame).T,
-                                 np.dot(point_data.T, Y_frame).T,
-                                 np.dot(point_data.T, Z_frame).T])
+    point_data_proj = np.array([np.einsum("ij,ij->j", point_data, X_frame),
+                                np.einsum("ij,ij->j", point_data, Y_frame),
+                                np.einsum("ij,ij->j", point_data, Z_frame),])
     return point_data_proj
 
 def calculate_error_anatomical_frame(points_data_ref : np.ndarray, points_name_ref : list, point_name_ref : str,
@@ -227,13 +227,9 @@ def calculate_error_anatomical_frame(points_data_ref : np.ndarray, points_name_r
     point_coordinate = points_data[:, index_point_synth, :]
     point_ref = points_data_ref[:, index_point_MB, :]
 
-    point_proj = point_proj = np.array([np.einsum("ij,ij->j", point_coordinate, X_frame),
-                                        np.einsum("ij,ij->j", point_coordinate, Y_frame),
-                                        np.einsum("ij,ij->j", point_coordinate, Z_frame),])
+    point_proj = project_point_onto_frame(point_coordinate, X_frame, Y_frame, Z_frame)
+    point_ref_proj = project_point_onto_frame(point_ref, X_frame, Y_frame, Z_frame)
 
-    point_ref_proj = np.array([np.einsum("ij,ij->j", point_ref, X_frame),
-                               np.einsum("ij,ij->j", point_ref, Y_frame),
-                               np.einsum("ij,ij->j", point_ref, Z_frame),])
     error = point_proj - point_ref_proj
 
     return error
