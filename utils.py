@@ -8,6 +8,7 @@ from tkinter import Tk, filedialog
 from scipy.interpolate import interp1d
 from scipy.signal import butter, sosfiltfilt
 
+
 def transforms_zero_to_nan(point_data: np.ndarray):
     """
     Transforms all [0, 0, 0] points in the point data to NaN.
@@ -219,6 +220,7 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
 
     return R_GH, L_GH
 
+
 def calculate_mid_point(point_data: np.ndarray, name_point_list: list):
     # elbow joint center
     # 1. Extract marker labels list from the C3D object
@@ -230,12 +232,12 @@ def calculate_mid_point(point_data: np.ndarray, name_point_list: list):
     def get_marker(label_name):
         return point_data[0:4, all_labels.index(label_name), :]
 
-    R_EJC = (get_marker("R_EL")+get_marker("R_EM"))/2
-    L_EJC = (get_marker("L_EL")+get_marker("L_EM"))/2
-    R_WJC = (get_marker("R_RS")+get_marker("R_US"))/2
-    L_WJC = (get_marker("L_RS")+get_marker("L_US"))/2
-    R_FJC = (get_marker("R_HM5")+get_marker("R_HM2"))/2
-    L_FJC = (get_marker("L_HM5")+get_marker("L_HM2"))/2
+    R_EJC = (get_marker("R_EL") + get_marker("R_EM")) / 2
+    L_EJC = (get_marker("L_EL") + get_marker("L_EM")) / 2
+    R_WJC = (get_marker("R_RS") + get_marker("R_US")) / 2
+    L_WJC = (get_marker("L_RS") + get_marker("L_US")) / 2
+    R_FJC = (get_marker("R_HM5") + get_marker("R_HM2")) / 2
+    L_FJC = (get_marker("L_HM5") + get_marker("L_HM2")) / 2
 
     return R_EJC, L_EJC, R_WJC, L_WJC, R_FJC, L_FJC
 
@@ -294,9 +296,7 @@ def filter_point_data_with_nan_segments(
             # --------------------------------------------------
             is_nan = np.isnan(x)
 
-            changes = np.diff(
-                np.r_[False, is_nan, False].astype(int)
-            )
+            changes = np.diff(np.r_[False, is_nan, False].astype(int))
 
             gap_starts = np.where(changes == 1)[0]
             gap_ends = np.where(changes == -1)[0]
@@ -322,10 +322,12 @@ def filter_point_data_with_nan_segments(
 
                 # Values immediately before and after the gap
                 x_known = np.array([start - 1, end])
-                y_known = np.array([
-                    x[start - 1],
-                    x[end],
-                ])
+                y_known = np.array(
+                    [
+                        x[start - 1],
+                        x[end],
+                    ]
+                )
 
                 # Safety check
                 if np.isnan(y_known).any():
@@ -339,18 +341,14 @@ def filter_point_data_with_nan_segments(
 
                 frames_to_fill = np.arange(start, end)
 
-                x_interp[frames_to_fill] = interpolator(
-                    frames_to_fill
-                )
+                x_interp[frames_to_fill] = interpolator(frames_to_fill)
 
             # --------------------------------------------------
             # Find continuous valid segments after interpolation
             # --------------------------------------------------
             valid = ~np.isnan(x_interp)
 
-            changes = np.diff(
-                np.r_[False, valid, False].astype(int)
-            )
+            changes = np.diff(np.r_[False, valid, False].astype(int))
 
             starts = np.where(changes == 1)[0]
             ends = np.where(changes == -1)[0]

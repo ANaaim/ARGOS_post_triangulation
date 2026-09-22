@@ -46,7 +46,6 @@ def compare_absolute_file(
     return dict_error_Synth, dict_error_RTM
 
 
-
 def compare_anatomical_frame_file(
     path_synth: Path,
     path_RTM: Path,
