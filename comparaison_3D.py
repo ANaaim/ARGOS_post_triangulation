@@ -180,7 +180,7 @@ if __name__ == "__main__":
                          "R_US":"r_mwrist",
                          "L_RS":"l_lwrist",
                          "L_US":"l_mwrist",}
-
+    all_errors = []
     for subject in path_marker_based.iterdir():
         for task_file in (subject).glob("*.c3d"):
             if (path_synth / subject.name / task_file.name).exists() and (path_RTM / subject.name / task_file.name).exists():
