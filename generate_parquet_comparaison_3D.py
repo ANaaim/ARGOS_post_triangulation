@@ -93,7 +93,6 @@ def compare_anatomical_frame_file(
                                                      point_name = point_RTM,
                                                      frame_to_use=frame_to_use,
                                                      side=side)
-            dict_error_Synth[point_MB] = error
             dict_error_RTM[point_MB] = error
 
     return dict_error_Synth, dict_error_RTM
@@ -268,9 +267,16 @@ def main():
 
                 all_errors.extend([df_error_Synth, df_error_RTM, df_error_anat_Synth, df_error_anat_RTM])
     # Combine toutes les erreurs
-    df_errors = pl.concat(all_errors)
+    df_errors = (
+                pl.concat(all_errors)
+                .with_columns(
+                pl.col(["error_x", "error_y", "error_z", "error_norm"]).fill_nan(None)))
     # Sauvegarde
     output_file = path_data / "absolute_position_errors.parquet"
+    # df_cleaned = df_errors.with_columns(pl.col("error_x").fill_nan(None))
+    # df_cleaned = df_cleaned.with_columns(pl.col("error_y").fill_nan(None))
+    # df_cleaned = df_cleaned.with_columns(pl.col("error_z").fill_nan(None))
+    # df_cleaned = df_cleaned.with_columns(pl.col("error_norm").fill_nan(None))   
     df_errors.write_parquet(output_file)
     print(f"Errors saved to: {output_file}")
     print(df_errors)
