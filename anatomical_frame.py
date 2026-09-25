@@ -1,7 +1,28 @@
 import numpy as np
 
 
-def extract_anatomical_frame(points_data, points_name, frame_to_use, side="R"):
+def extract_anatomical_frame(points_data: np.ndarray, points_name: list, frame_to_use: str, side="R"):
+    """
+    Extract the anatomical frame for a given body part.
+
+    Parameters:
+    -----------
+    points_data : np.ndarray
+        A 3D numpy array of shape (3, n_points, n_frames) containing the 3D coordinates of the points.
+    points_name : list
+        A list of point names corresponding to the second dimension of points_data.
+        The list should contain the names of the points in the same order as they appear in the points_data array.
+    frame_to_use : str
+        The body part for which to extract the anatomical frame.
+    side : str, optional
+        The side of the body (default is "R" for right).
+
+
+    Returns:
+    --------
+    X_MB, Y_MB, Z_MB : np.ndarray
+        The anatomical frame axes for the specified body part.
+    """
     # Assuming the first character indicates the side (R or L)
     if frame_to_use == "thorax":
         X_MB, Y_MB, Z_MB = thorax_anatomical_frame(points_data, points_name)
@@ -14,7 +35,25 @@ def extract_anatomical_frame(points_data, points_name, frame_to_use, side="R"):
     return X_MB, Y_MB, Z_MB
 
 
-def thorax_anatomical_frame(points_data, points_name):
+
+def thorax_anatomical_frame(points_data: np.ndarray, points_name: list):
+    """
+    Calculate the thorax anatomical frame based on the positions of the markers IJ, C7, T10, and PX.
+    
+    Parameters:
+    -----------
+    points_data : np.ndarray
+        A 3D numpy array of shape (3, n_points, n_frames) containing the 3D coordinates of the points.
+    points_name : list
+        A list of point names corresponding to the second dimension of points_data.
+        The list should contain the names of the points in the same order as they appear in the points_data array.
+    
+    Returns:
+    --------
+    X_thorax, Y_thorax, Z_thorax : np.ndarray
+        The anatomical frame axes for the thorax.
+
+    """
     # get the index of the points in the points_name list
     index_IJ = points_name.index("IJ")
     index_C7 = points_name.index("C7")
@@ -36,7 +75,24 @@ def thorax_anatomical_frame(points_data, points_name):
 
     return X_thorax, Y_thorax, Z_thorax
 
-def humerus_anatomical_frame(points_data, points_name, side="R"):
+def humerus_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
+    """
+    Calculate the humerus anatomical frame based on the positions of the markers GH, EL, and EM.
+    Parameters:
+    -----------
+    points_data : np.ndarray
+        A 3D numpy array of shape (3, n_points, n_frames) containing the 3D coordinates of the points.
+    points_name : list
+        A list of point names corresponding to the second dimension of points_data.
+        The list should contain the names of the points in the same order as they appear in the points_data array.
+    side : str, optional
+        The side of the body (default is "R" for right).
+
+    Returns:
+    --------
+    X_humerus, Y_humerus, Z_humerus : np.ndarray
+        The anatomical frame axes for the humerus.
+    """
     # get the index of the points in the points_name list
     index_GH = points_name.index(f"{side}_GH")
     index_EL = points_name.index(f"{side}_EL")
@@ -60,7 +116,23 @@ def humerus_anatomical_frame(points_data, points_name, side="R"):
 
     return X_humerus, Y_humerus, Z_humerus
 
-def forearm_anatomical_frame(points_data, points_name, side="R"):
+def forearm_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
+    """
+    Calculate the forearm anatomical frame based on the positions of the markers EL, EM, RS, and US.
+    Parameters:
+    -----------
+    points_data : np.ndarray
+        A 3D numpy array of shape (3, n_points, n_frames) containing the 3D coordinates of the points.
+    points_name : list
+        A list of point names corresponding to the second dimension of points_data.
+        The list should contain the names of the points in the same order as they appear in the points_data array.
+    side : str, optional
+        The side of the body (default is "R" for right).
+    Returns:
+    --------
+    X_forearm, Y_forearm, Z_forearm : np.ndarray
+        The anatomical frame axes for the forearm.
+    """
     # get the index of the points in the points_name list
     index_EL = points_name.index(f"{side}_EL")
     index_EM = points_name.index(f"{side}_EM")
@@ -86,7 +158,23 @@ def forearm_anatomical_frame(points_data, points_name, side="R"):
 
     return X_forearm, Y_forearm, Z_forearm
 
-def hand_anatomical_frame(points_data, points_name, side="R"):
+def hand_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
+    """
+    Calculate the hand anatomical frame based on the positions of the markers HM2, HM5, RS, and US.
+    Parameters:
+    -----------
+    points_data : np.ndarray
+        A 3D numpy array of shape (3, n_points, n_frames) containing the 3D coordinates of the points.
+    points_name : list
+        A list of point names corresponding to the second dimension of points_data.
+        The list should contain the names of the points in the same order as they appear in the points_data array.
+    side : str, optional
+        The side of the body (default is "R" for right).
+    Returns:
+    --------
+    X_hand, Y_hand, Z_hand : np.ndarray
+        The anatomical frame axes for the hand.
+    """
     # get the index of the points in the points_name list
     index_HM2 = points_name.index(f"{side}_HM2")
     index_HM5 = points_name.index(f"{side}_HM5")
