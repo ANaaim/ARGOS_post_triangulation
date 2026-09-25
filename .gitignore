@@ -1,7 +1,5 @@
 /data
 /figures
 /Kinematics
-/logs
 /old
 *.pyc
-*.zip
