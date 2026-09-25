@@ -4,6 +4,24 @@ import ezc3d
 
 
 def load_c3d(path: Path):
+    """
+    Load a C3D file and return the c3d object, point data, frame rate, and point labels.    
+    Parameters:
+    -----------
+    path : Path
+        Path to the C3D file.
+    Returns:
+    --------
+    tuple
+        c3d : ezc3d.c3d
+        points : np.ndarray
+            Array of shape (n_channels, n_points, n_frames) containing the point data.
+        fq : float
+            Frame rate of the C3D file.
+        labels : list
+            List of point labels.
+    """
+
     c3d = ezc3d.c3d(str(path))
     return (
         c3d,
@@ -16,6 +34,10 @@ def load_c3d(path: Path):
 def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, output_path: Path):
     """
     Write a new C3D file with the given points, point names, and frame rate.
+    
+    Parameters:
+    -----------
+
     points: np.ndarray of shape (n_channels, n_points, n_frames)
     name_points: list of point names
     fq_new_file: new frame rate (Hz)
