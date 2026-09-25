@@ -33,4 +33,3 @@ def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, out
 
     # Save the new C3D file
     c3d.write(str(output_path))
-

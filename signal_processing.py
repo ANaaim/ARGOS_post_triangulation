@@ -285,4 +285,3 @@ def filter_point_data_with_nan_segments(
             filtered[dim, marker, :] = y
 
     return filtered
-

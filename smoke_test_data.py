@@ -139,9 +139,7 @@ def generate_missing_point_NaN_in_files(path_data: Path, is_marker_less: bool = 
 
                         if is_missing:
                             if current_segment is None:
-                                current_segment = {
-                                    "start_frame": frame_idx + 1
-                                }
+                                current_segment = {"start_frame": frame_idx + 1}
 
                         else:
                             if current_segment is not None:
@@ -168,18 +166,14 @@ def generate_missing_point_NaN_in_files(path_data: Path, is_marker_less: bool = 
                             n_missing = end - start + 1
 
                             log_file.write(
-                                f"  Start Frame: {start}, "
-                                f"End Frame: {end}, "
-                                f"Missing Frames: {n_missing}\n"
+                                f"  Start Frame: {start}, " f"End Frame: {end}, " f"Missing Frames: {n_missing}\n"
                             )
 
                 if trial_has_missing_data:
-                    print(
-                        f"Logging missing points for "
-                        f"{trial_name} in {log_file_path}"
-                    )
+                    print(f"Logging missing points for " f"{trial_name} in {log_file_path}")
                 else:
                     log_file.write("No missing points detected.\n")
+
 
 if __name__ == "__main__":
 
@@ -194,7 +188,6 @@ if __name__ == "__main__":
                 log_file_path = subject / "missing_points_log.txt"
                 if log_file_path.exists():
                     log_file_path.unlink()
-
 
     generate_missing_point_NaN_in_files(path_marker_based, is_marker_less=False)
     for model in list_model_ML:

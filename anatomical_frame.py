@@ -35,11 +35,10 @@ def extract_anatomical_frame(points_data: np.ndarray, points_name: list, frame_t
     return X_MB, Y_MB, Z_MB
 
 
-
 def thorax_anatomical_frame(points_data: np.ndarray, points_name: list):
     """
     Calculate the thorax anatomical frame based on the positions of the markers IJ, C7, T10, and PX.
-    
+
     Parameters:
     -----------
     points_data : np.ndarray
@@ -47,7 +46,7 @@ def thorax_anatomical_frame(points_data: np.ndarray, points_name: list):
     points_name : list
         A list of point names corresponding to the second dimension of points_data.
         The list should contain the names of the points in the same order as they appear in the points_data array.
-    
+
     Returns:
     --------
     X_thorax, Y_thorax, Z_thorax : np.ndarray
@@ -65,15 +64,16 @@ def thorax_anatomical_frame(points_data: np.ndarray, points_name: list):
     C7 = points_data[:, index_C7, :]
     T10 = points_data[:, index_T10, :]
     PX = points_data[:, index_PX, :]
-    
+
     # calculate the thorax anatomical frame
-    Y_thorax = ((IJ+C7)/2)-(PX+T10)/2
+    Y_thorax = ((IJ + C7) / 2) - (PX + T10) / 2
     Y_thorax /= np.linalg.norm(Y_thorax, axis=0)
     Z_thorax = np.cross((C7 - IJ), Y_thorax, axis=0)
     Z_thorax /= np.linalg.norm(Z_thorax, axis=0)
     X_thorax = np.cross(Y_thorax, Z_thorax, axis=0)
 
     return X_thorax, Y_thorax, Z_thorax
+
 
 def humerus_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
     """
@@ -104,17 +104,18 @@ def humerus_anatomical_frame(points_data: np.ndarray, points_name: list, side="R
     EM = points_data[:, index_EM, :]
 
     # calculate the humerus anatomical frame
-    Y_humerus = (GH-(EL+EM)/2)
+    Y_humerus = GH - (EL + EM) / 2
     Y_humerus /= np.linalg.norm(Y_humerus, axis=0)
-    X_humerus = np.cross(Y_humerus,(EL - EM), axis=0)
+    X_humerus = np.cross(Y_humerus, (EL - EM), axis=0)
     X_humerus /= np.linalg.norm(X_humerus, axis=0)
     Z_humerus = np.cross(X_humerus, Y_humerus, axis=0)
 
     if side == "L":
         X_humerus = -X_humerus
-        Z_humerus = -Z_humerus 
+        Z_humerus = -Z_humerus
 
     return X_humerus, Y_humerus, Z_humerus
+
 
 def forearm_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
     """
@@ -146,7 +147,7 @@ def forearm_anatomical_frame(points_data: np.ndarray, points_name: list, side="R
     US = points_data[:, index_US, :]
 
     # calculate the forearm anatomical frame
-    Y_forearm = (RS+US)/2-(EL+EM)/2
+    Y_forearm = (RS + US) / 2 - (EL + EM) / 2
     Y_forearm /= np.linalg.norm(Y_forearm, axis=0)
     X_forearm = np.cross(Y_forearm, (RS - US), axis=0)
     X_forearm /= np.linalg.norm(X_forearm, axis=0)
@@ -154,9 +155,10 @@ def forearm_anatomical_frame(points_data: np.ndarray, points_name: list, side="R
 
     if side == "L":
         X_forearm = -X_forearm
-        Z_forearm = -Z_forearm 
+        Z_forearm = -Z_forearm
 
     return X_forearm, Y_forearm, Z_forearm
+
 
 def hand_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
     """
@@ -188,7 +190,7 @@ def hand_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
     US = points_data[:, index_US, :]
 
     # calculate the hand anatomical frame
-    Y_hand = (RS+US)/2-(HM2+HM5)/2
+    Y_hand = (RS + US) / 2 - (HM2 + HM5) / 2
     Y_hand /= np.linalg.norm(Y_hand, axis=0)
     X_hand = np.cross(Y_hand, (HM2 - HM5), axis=0)
     X_hand /= np.linalg.norm(X_hand, axis=0)
@@ -196,7 +198,6 @@ def hand_anatomical_frame(points_data: np.ndarray, points_name: list, side="R"):
 
     if side == "L":
         X_hand = -X_hand
-        Z_hand = -Z_hand 
+        Z_hand = -Z_hand
 
     return X_hand, Y_hand, Z_hand
-

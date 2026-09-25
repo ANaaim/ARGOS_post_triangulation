@@ -1,7 +1,6 @@
 from tkinter import Tk, filedialog
 
 
-
 def choose_file():
     root = Tk()
     root.withdraw()  # cache la fenêtre principale

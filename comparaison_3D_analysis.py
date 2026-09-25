@@ -4,9 +4,6 @@ from plotly.subplots import make_subplots
 from pathlib import Path
 
 
-
-
-
 def plot_error_quantiles(
     df: pl.DataFrame,
     subjects: list[str] | None = None,
@@ -31,29 +28,19 @@ def plot_error_quantiles(
     # Filter data
     # ---------------------------------------------------------
 
-    df_plot = df.filter(
-        pl.col("coordinate_system") == coordinate_system
-    )
+    df_plot = df.filter(pl.col("coordinate_system") == coordinate_system)
 
     if subjects is not None:
-        df_plot = df_plot.filter(
-            pl.col("subject").is_in(subjects)
-        )
+        df_plot = df_plot.filter(pl.col("subject").is_in(subjects))
 
     if tasks is not None:
-        df_plot = df_plot.filter(
-            pl.col("task").is_in(tasks)
-        )
+        df_plot = df_plot.filter(pl.col("task").is_in(tasks))
 
     if points is not None:
-        df_plot = df_plot.filter(
-            pl.col("point_short").is_in(points)
-        )
+        df_plot = df_plot.filter(pl.col("point_short").is_in(points))
 
     if models is not None:
-        df_plot = df_plot.filter(
-            pl.col("model").is_in(models)
-        )
+        df_plot = df_plot.filter(pl.col("model").is_in(models))
 
     # ---------------------------------------------------------
     # Quantiles
@@ -67,17 +54,14 @@ def plot_error_quantiles(
     ]
 
     quantiles = (
-        df_plot
-        .unpivot(
+        df_plot.unpivot(
             index=["point_short", "model"],
             on=error_columns,
             variable_name="component",
             value_name="error",
         )
         .drop_nulls("error")
-        .group_by(
-            ["point_short", "model", "component"]
-        )
+        .group_by(["point_short", "model", "component"])
         .agg(
             pl.col("error").quantile(0.05).alias("q05"),
             pl.col("error").quantile(0.20).alias("q20"),
@@ -120,23 +104,9 @@ def plot_error_quantiles(
         "RTMPose": "#EF3B3B",
     }
 
-    model_list = (
-        df_plot
-        .select("model")
-        .unique()
-        .sort("model")
-        .to_series()
-        .to_list()
-    )
+    model_list = df_plot.select("model").unique().sort("model").to_series().to_list()
 
-    point_list = (
-        df_plot
-        .select("point_short")
-        .unique()
-        .sort("point_short")
-        .to_series()
-        .to_list()
-    )
+    point_list = df_plot.select("point_short").unique().sort("point_short").to_series().to_list()
 
     # ---------------------------------------------------------
     # Add traces
@@ -146,22 +116,16 @@ def plot_error_quantiles(
 
         for model in model_list:
 
-            data = quantiles.filter(
-                (pl.col("component") == component)
-                & (pl.col("model") == model)
-            )
+            data = quantiles.filter((pl.col("component") == component) & (pl.col("model") == model))
 
             if data.is_empty():
                 continue
 
             # Keep same point order on all subplots
-            data = (
-                pl.DataFrame({"point_short": point_list})
-                .join(
-                    data,
-                    on="point_short",
-                    how="left",
-                )
+            data = pl.DataFrame({"point_short": point_list}).join(
+                data,
+                on="point_short",
+                how="left",
             )
 
             x = data["point_short"].to_list()
@@ -180,23 +144,16 @@ def plot_error_quantiles(
                 go.Box(
                     name=model,
                     x=x,
-
                     q1=q20,
                     median=median,
                     q3=q70,
-
                     lowerfence=q05,
                     upperfence=q95,
-
                     marker_color=color,
-
                     legendgroup=model,
-
                     # Only show model once in legend
                     showlegend=(component == "error_x"),
-
                     customdata=n,
-
                     hovertemplate=(
                         "<b>%{x}</b><br>"
                         f"Model: {model}<br>"
@@ -218,10 +175,7 @@ def plot_error_quantiles(
     # ---------------------------------------------------------
 
     fig.update_layout(
-        title=(
-            f"Marker position errors - "
-            f"{coordinate_system.capitalize()} coordinate system"
-        ),
+        title=(f"Marker position errors - " f"{coordinate_system.capitalize()} coordinate system"),
         boxmode="group",
         template="plotly_white",
         height=900,
@@ -276,27 +230,15 @@ if __name__ == "__main__":
     points_to_plot = ["HM2", "HM5", "RS", "US"]
     models_to_plot = ["SynthPose", "RTMPose"]
     # check if all the condition are in the dataframe
-    if not all(
-        df.filter(pl.col("subject").is_in(subjects_to_plot)).shape[0] > 0
-        for subject in subjects_to_plot
-    ):
+    if not all(df.filter(pl.col("subject").is_in(subjects_to_plot)).shape[0] > 0 for subject in subjects_to_plot):
         raise ValueError("Some subjects are not present in the dataframe.")
-    if not all(
-        df.filter(pl.col("task").is_in(tasks_to_plot)).shape[0] > 0
-        for task in tasks_to_plot
-    ):
+    if not all(df.filter(pl.col("task").is_in(tasks_to_plot)).shape[0] > 0 for task in tasks_to_plot):
         raise ValueError("Some tasks are not present in the dataframe.")
-    if not all(
-        df.filter(pl.col("point_short").is_in(points_to_plot)).shape[0] > 0
-        for point in points_to_plot
-    ):
+    if not all(df.filter(pl.col("point_short").is_in(points_to_plot)).shape[0] > 0 for point in points_to_plot):
         raise ValueError("Some points are not present in the dataframe.")
-    if not all(
-        df.filter(pl.col("model").is_in(models_to_plot)).shape[0] > 0
-        for model in models_to_plot
-    ):
+    if not all(df.filter(pl.col("model").is_in(models_to_plot)).shape[0] > 0 for model in models_to_plot):
         raise ValueError("Some models are not present in the dataframe.")
-    
+
     plot_error_quantiles(
         df=df,
         subjects=subjects_to_plot,

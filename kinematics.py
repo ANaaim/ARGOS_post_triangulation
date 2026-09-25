@@ -6,7 +6,6 @@ import biorbd
 from biobuddy import C3dData
 
 
-
 def main(filename, model_name, show: bool = True, filename_output=None):
     # Load a predefined model
     model = biorbd.Model(model_name)

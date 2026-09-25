@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_RAB(point_data: np.ndarray, name_point_list: list):
     # TODO: to make more clear
     # 1. Extract marker labels list from the C3D object
@@ -56,4 +57,3 @@ def calculate_mid_point(point_data: np.ndarray, name_point_list: list):
     L_FJC = (get_marker("L_HM5") + get_marker("L_HM2")) / 2
 
     return R_EJC, L_EJC, R_WJC, L_WJC, R_FJC, L_FJC
-

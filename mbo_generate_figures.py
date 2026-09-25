@@ -12,10 +12,10 @@ base_folder = Path("Kinematics")
 
 model_to_analyze = "with_2dof_hand"
 
-folder_MB = base_folder / "Marker_based" / model_to_analyze 
-folder_ML_SynthRTM = base_folder / "SynthRTMpose" / model_to_analyze 
-folder_ML_Synthpose = base_folder / "Synthpose" / model_to_analyze 
-#folder_fake_ML = base_folder / "test" / model_to_analyze / "fake_markerless"
+folder_MB = base_folder / "Marker_based" / model_to_analyze
+folder_ML_SynthRTM = base_folder / "SynthRTMpose" / model_to_analyze
+folder_ML_Synthpose = base_folder / "Synthpose" / model_to_analyze
+# folder_fake_ML = base_folder / "test" / model_to_analyze / "fake_markerless"
 
 # Figures output folder
 figure_root = Path("./figures")
@@ -91,11 +91,7 @@ def generate_task_figure(subject_name, task_name, aligned_data):
 
     reference_df = next(iter(aligned_data.values()))
 
-    variables = [
-        col
-        for col in reference_df.columns
-        if col not in NON_ANGLE_VARIABLES
-    ]
+    variables = [col for col in reference_df.columns if col not in NON_ANGLE_VARIABLES]
 
     n_vars = len(variables)
 
@@ -105,11 +101,7 @@ def generate_task_figure(subject_name, task_name, aligned_data):
     subject_fig_folder = figure_root / subject_name
     subject_fig_folder.mkdir(parents=True, exist_ok=True)
 
-    fig, axes = plt.subplots(
-        rows,
-        cols,
-        figsize=(16, 4 * rows)
-    )
+    fig, axes = plt.subplots(rows, cols, figsize=(16, 4 * rows))
 
     axes = np.array(axes).flatten()
 
@@ -182,8 +174,6 @@ def generate_task_figure(subject_name, task_name, aligned_data):
     print(f"   ✔ Saved figure: {filepath}")
 
 
-
-
 # ---------------------------------------------------------------------
 # MAIN LOOP: GENERATE CSV + FIGURES
 # ---------------------------------------------------------------------
@@ -223,21 +213,18 @@ for subject in folder_MB.iterdir():
         print(f"   Marker-based frames   = {n_mb}")
         print(f"   Detected freq ratio   = {ratio:.2f}")
 
-
         aligned_data = {
             "Markerless_Synthpose": df_ml_Synthpose,
             "MarkerBased": df_mb,
-            "Markerless_SynthRTM": df_ml_SynthRTM}
+            "Markerless_SynthRTM": df_ml_SynthRTM,
+        }
 
         # -------------------------
         # GENERATE FULL FIGURE
         # -------------------------
         task_name = csv_name.replace(".csv", "")
 
-        generate_task_figure(
-            subject_name,
-            task_name,
-            aligned_data)
+        generate_task_figure(subject_name, task_name, aligned_data)
 
 # # ---------------------------------------------------------------------
 # # FINAL CSV

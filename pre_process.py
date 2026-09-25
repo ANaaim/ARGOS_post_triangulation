@@ -150,13 +150,17 @@ def pre_processed_marker_based_files(file_path: Path, output_folder: Path):
     # Add the R_GH and L_GH to the resampled_points
     resampled_points = np.concatenate((resampled_points, R_GH[:, np.newaxis, :], L_GH[:, np.newaxis, :]), axis=1)
     resampled_points = np.concatenate(
-        (resampled_points, 
-        R_EJC[:, np.newaxis, :],
-        L_EJC[:, np.newaxis, :], 
-        R_WJC[:, np.newaxis, :], 
-        L_WJC[:, np.newaxis, :], 
-        R_FJC[:, np.newaxis, :], 
-        L_FJC[:, np.newaxis, :]), axis=1)   
+        (
+            resampled_points,
+            R_EJC[:, np.newaxis, :],
+            L_EJC[:, np.newaxis, :],
+            R_WJC[:, np.newaxis, :],
+            L_WJC[:, np.newaxis, :],
+            R_FJC[:, np.newaxis, :],
+            L_FJC[:, np.newaxis, :],
+        ),
+        axis=1,
+    )
     name_points.append("R_GH")
     name_points.append("L_GH")
     name_points.append("R_EJC")

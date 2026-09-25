@@ -18,7 +18,6 @@ from biobuddy import (
 )
 
 
-
 def marker_based(
     static_trial_path: Path,
     model_name: str,
@@ -334,6 +333,7 @@ def marker_based(
         model_real.animate(view_as=ViewAs.BIORBD, model_path=output_model_filepath)
 
     return model_real
+
 
 def synthRTM(
     static_trial_path: Path,
@@ -658,6 +658,7 @@ def synthRTM(
         model_real.animate(view_as=ViewAs.BIORBD, model_path=output_model_filepath)
 
     return model_real
+
 
 def synthpose(
     static_trial_path: Path,

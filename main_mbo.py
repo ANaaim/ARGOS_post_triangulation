@@ -134,7 +134,7 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "Marker_based" / "with_1dof_hand"
     )
-    model_creation = create_model_upperlimb.marker_based # Use the appropriate function for model creation
+    model_creation = create_model_upperlimb.marker_based  # Use the appropriate function for model creation
     mbo(
         root_folder_marker_based,
         static_filename,
