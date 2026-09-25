@@ -79,6 +79,7 @@ This script compares marker-based and markerless kinematics and saves PNG figure
 
 ### 4. Generate comparison data
 
+
 Run:
 
 ```bash

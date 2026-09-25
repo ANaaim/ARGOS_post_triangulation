@@ -10,6 +10,8 @@ from biobuddy import (
     Segment,
     SegmentCoordinateSystem,
     Translations,
+    RangeOfMotion,
+    Ranges,
     Rotations,
     ViewAs,
     SegmentCoordinateSystemUtils,
