@@ -1,7 +1,15 @@
 from tkinter import Tk, filedialog
 
 
-def choose_file():
+def choose_file_npy():
+    """
+    Open a file dialog to choose a .npy file.
+
+    Returns
+    -------
+    filename : str
+        The path to the chosen file.
+    """
     root = Tk()
     root.withdraw()  # cache la fenêtre principale
 

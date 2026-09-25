@@ -3,7 +3,7 @@ import numpy as np
 from biobuddy import C3dData
 import biorbd
 from pathlib import Path
-from choose_file import choose_file
+from choose_file import choose_file_npy
 
 
 def visualize(npy_file):
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         npy_file = sys.argv[1]
     else:
-        npy_file = choose_file()
+        npy_file = choose_file_npy()
 
     if npy_file:
         visualize(npy_file)
