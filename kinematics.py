@@ -1,10 +1,10 @@
 from pathlib import Path
-from pyorerun import BiorbdModel, PhaseRerun, PyoMarkers
-
 import numpy as np
+import pandas as pd
+from pyorerun import BiorbdModel, PhaseRerun, PyoMarkers
 import biorbd
 from biobuddy import C3dData
-import pandas as pd
+
 
 
 def main(filename, model_name, show: bool = True, filename_output=None):

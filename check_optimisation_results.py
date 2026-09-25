@@ -1,4 +1,4 @@
-from utils import choose_file
+from choose_file import choose_file
 import numpy as np
 
 

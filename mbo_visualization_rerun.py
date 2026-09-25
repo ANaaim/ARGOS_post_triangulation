@@ -3,7 +3,7 @@ import numpy as np
 from biobuddy import C3dData
 import biorbd
 from pathlib import Path
-from utils import choose_file
+from choose_file import choose_file
 
 
 def visualize(npy_file):

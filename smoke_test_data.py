@@ -1,7 +1,7 @@
 # function to test if the data are coherent between the marker-based and the markerless c3d files
 from pathlib import Path
 import numpy as np
-from utils import load_c3d
+from c3d_io import load_c3d
 
 
 def check_data_presence(path_marker_based: Path, path_marker_less: Path):

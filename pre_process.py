@@ -1,17 +1,15 @@
 import ezc3d
 from pathlib import Path
 import numpy as np
-from utils import (
+from signal_processing import (
     transforms_zero_to_nan,
     extract_trim_from_marker_based,
     resample_point_data,
-    load_c3d,
-    write_new_c3d,
     filter_point_data_with_nan_segments,
     XYZ_to_ZXY,
-    calculate_RAB,
-    calculate_mid_point
 )
+from anatomical_regression import calculate_RAB, calculate_mid_point
+from c3d_io import load_c3d, write_new_c3d
 import snip_ezc3d as snip
 
 

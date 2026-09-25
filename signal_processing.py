@@ -1,9 +1,7 @@
-from scipy.signal import butter, sosfiltfilt
 import numpy as np
 import ezc3d
 from pathlib import Path
 import pandas as pd
-from tkinter import Tk, filedialog
 
 from scipy.interpolate import interp1d
 from scipy.signal import butter, sosfiltfilt
@@ -152,96 +150,6 @@ def extract_trim_from_marker_based(path_c3d: Path):
     return to_trim, start_idx, end_idx
 
 
-def load_c3d(path: Path):
-    c3d = ezc3d.c3d(str(path))
-    return (
-        c3d,
-        c3d["data"]["points"],
-        c3d["parameters"]["POINT"]["RATE"]["value"][0],
-        c3d["parameters"]["POINT"]["LABELS"]["value"],
-    )
-
-
-def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, output_path: Path):
-    """
-    Write a new C3D file with the given points, point names, and frame rate.
-    points: np.ndarray of shape (n_channels, n_points, n_frames)
-    name_points: list of point names
-    fq_new_file: new frame rate (Hz)
-    output_path: path to save the new C3D file
-    """
-
-    # Load an empty c3d structure
-    c3d = ezc3d.c3d()
-
-    # Fill it with random data
-    c3d["parameters"]["POINT"]["UNITS"]["value"] = ["mm"]
-    c3d["parameters"]["POINT"]["RATE"]["value"] = [fq_new_file]
-    c3d["parameters"]["POINT"]["LABELS"]["value"] = name_points
-    c3d["data"]["points"] = points
-
-    # Save the new C3D file
-    c3d.write(str(output_path))
-
-
-def calculate_RAB(point_data: np.ndarray, name_point_list: list):
-    # TODO: to make more clear
-    # 1. Extract marker labels list from the C3D object
-    all_labels = [label.strip() for label in name_point_list]
-
-    n_frames = point_data.shape[2]
-
-    # Helper function to get marker coordinates safely
-    def get_marker(label_name):
-        return point_data[0:4, all_labels.index(label_name), :]
-
-    # --- 2. CALCULATE VIRTUAL MARKERS ---
-
-    # Midpoints for ISB Thorax
-    mid_end = (get_marker("IJ") + get_marker("C7")) / 2.0
-    mid_start = (get_marker("PX") + get_marker("T10")) / 2.0
-
-    Z_thorax = mid_end - mid_start
-    Z_thorax /= np.linalg.norm(Z_thorax, axis=0)
-    # Bi-acromial distance & Glenohumeral Joint Centers (Rab 2002)
-    R_AC = get_marker("R_AC")
-    L_AC = get_marker("L_AC")
-    D_all = np.linalg.norm(R_AC[:3, :] - L_AC[:3, :], axis=0)
-    D = np.mean(D_all)
-
-    R_GH = np.ones((4, n_frames))
-    L_GH = np.ones((4, n_frames))
-
-    # Right shoulder center
-    R_GH = R_AC.copy() - Z_thorax * (0.17 * D)
-
-    # Left shoulder center
-    L_GH = L_AC.copy() - Z_thorax * (0.17 * D)
-
-    return R_GH, L_GH
-
-
-def calculate_mid_point(point_data: np.ndarray, name_point_list: list):
-    # elbow joint center
-    # 1. Extract marker labels list from the C3D object
-    all_labels = [label.strip() for label in name_point_list]
-
-    n_frames = point_data.shape[2]
-
-    # Helper function to get marker coordinates safely
-    def get_marker(label_name):
-        return point_data[0:4, all_labels.index(label_name), :]
-
-    R_EJC = (get_marker("R_EL") + get_marker("R_EM")) / 2
-    L_EJC = (get_marker("L_EL") + get_marker("L_EM")) / 2
-    R_WJC = (get_marker("R_RS") + get_marker("R_US")) / 2
-    L_WJC = (get_marker("L_RS") + get_marker("L_US")) / 2
-    R_FJC = (get_marker("R_HM5") + get_marker("R_HM2")) / 2
-    L_FJC = (get_marker("L_HM5") + get_marker("L_HM2")) / 2
-
-    return R_EJC, L_EJC, R_WJC, L_WJC, R_FJC, L_FJC
-
-
 def filter_point_data_with_nan_segments(
     points: np.ndarray,
     fs: float,
@@ -378,14 +286,3 @@ def filter_point_data_with_nan_segments(
 
     return filtered
 
-
-def choose_file():
-    root = Tk()
-    root.withdraw()  # cache la fenêtre principale
-
-    filename = filedialog.askopenfilename(
-        title="Choisir un fichier NPY", filetypes=[("NumPy files", "*.npy"), ("All files", "*.*")]
-    )
-
-    root.destroy()
-    return filename
