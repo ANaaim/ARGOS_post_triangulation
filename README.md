@@ -16,7 +16,7 @@ The workflow is organized into a few steps:
 
 - `main_preprocessing.py`: preprocesses raw marker-based and markerless data, corrects markerless sampling frequency, filters signals, and creates fused markerless datasets.
 - `main_mbo.py`: builds personalized models and runs inverse kinematics for marker-based, SynthPose, and SynthRTMPose data.
-- `create_model_upperlimb.py`, `create_model_upperlimb_Synthpose.py`, `create_model_upperlimb_SynthRTM.py`: create the biomechanical models used by the kinematics pipeline.
+- `create_model_upperlimb.py` : create the biomechanical models used by the kinematics pipeline (three model available : Marker-based, SynthPose, and SynthRTMPose).
 - `mbo_generate_figures.py`: generates static comparison plots from the kinematics outputs for all subjects and models.
 - `mbo_visualization_rerun.py` : generates a 3D visualisation of the results of the inverse kinematics for a given subject and model by selecting the npy files.
 - `kinematics.py`: solves inverse kinematics for a C3D trial and exports joint angles as CSV, with optional `.npy` optimization metadata.
