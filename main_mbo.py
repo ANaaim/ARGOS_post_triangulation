@@ -1,13 +1,5 @@
-from create_model_upperlimb import model_creation_from_measured_data
 from pathlib import Path
-import kinematics
-import create_model_upperlimb as marker_based
-import create_model_upperlimb_Synthpose as synthpose
-import create_model_upperlimb_SynthRTM as synthRTM
-
-import os
-from pathlib import Path
-
+import create_model_upperlimb
 import kinematics
 
 
@@ -142,7 +134,7 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "Marker_based" / "with_1dof_hand"
     )
-    model_creation = marker_based.model_creation_from_measured_data  # Use the appropriate function for model creation
+    model_creation = create_model_upperlimb.marker_based # Use the appropriate function for model creation
     mbo(
         root_folder_marker_based,
         static_filename,
@@ -157,9 +149,9 @@ if __name__ == "__main__":
     folder_to_save_SynthRTMPose = (
         base_save_folder / "SynthRTMPose" / "with_2dof_hand"
         if two_dof_hand_model
-        else base_save_folder / "Synthpose" / "with_1dof_hand"
+        else base_save_folder / "SynthRTMPose" / "with_1dof_hand"
     )
-    model_creation = synthRTM.model_creation_from_measured_data  # Use the appropriate function for model creation
+    model_creation = create_model_upperlimb.synthRTM  # Use the appropriate function for model creation
     mbo(
         root_folder_SynthRTMPose,
         static_filename,
@@ -176,7 +168,7 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "Synthpose" / "with_1dof_hand"
     )
-    model_creation = synthpose.model_creation_from_measured_data  # Use the appropriate function for model creation
+    model_creation = create_model_upperlimb.synthpose  # Use the appropriate function for model creation
     mbo(
         root_folder_SynthPose,
         static_filename,
