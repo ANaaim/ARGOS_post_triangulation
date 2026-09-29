@@ -82,6 +82,8 @@ def correct_markerless_fq_file(trial: Path, ml_trial_path: Path, output_subject_
             c3d_ml["parameters"]["ROTATION"]["RATE"]["value"] = c3d_mb["parameters"]["POINT"]["RATE"]["value"]
     else:
         print(f"❌ The ratio of the frame counts is not 1 or 2 for {trial_name}. Ratio: {ratio}")
+        #stop here if the ratio is not 1 or 2
+        return
 
     print(str(output_subject_folder / f"{trial_name}.c3d"))
     c3d_ml.write(str(output_subject_folder / f"{trial_name}.c3d"))
@@ -182,7 +184,25 @@ def pre_processed_marker_less_folder(
     cutoff: float = 6.0,
     order: int = 4,
 ):
-    """ """
+    """
+    Pre-process a folder of markerless data based on the corresponding marker-based data.
+    Parameters:
+    -----------
+    folder_marker_based : Path
+        Path to the folder containing the marker-based data.
+    folder_markerless_to_correct : Path
+        Path to the folder containing the markerless data to be corrected.
+    folder_marker_less_to_export : Path
+        Path to the folder where the corrected markerless data will be exported.
+    remove_nan : bool, optional
+        Whether to remove NaN values from the data, by default True
+    filter_data : bool, optional
+        Whether to filter the data, by default True
+    cutoff : float, optional
+        Cutoff frequency for the filter, by default 6.0
+    order : int, optional
+        Order of the filter, by default 4
+    """
     for subject_folder in folder_marker_based.iterdir():
         if not subject_folder.is_dir():
             continue
@@ -266,7 +286,8 @@ def pre_processed_marker_less_files(
     write_new_c3d(points_ml_trimmed, name_points, fq_ml, str(output_subject_folder / f"{trial_name}.c3d"))
 
 
-def fusion_markerless_model(path_synthpose: Path, path_rtmpose: list, path_export: Path):
+
+def fusion_markerless_model(path_synthpose: Path, path_rtmpose: Path, path_export: Path):
     """
     Fusion of the markerless data from different models into one file.
     """

@@ -2,7 +2,24 @@ import numpy as np
 
 
 def calculate_RAB(point_data: np.ndarray, name_point_list: list):
-    # TODO: to make more clear
+    """
+    Calculate the Glenohumeral Joint Centers (GHJC) based on the RAB method (Rab 2002).
+
+    Parameters:
+    -----------
+    point_data : np.ndarray
+        Array of shape (n_channels, n_points, n_frames) containing the point data.
+    name_point_list : list
+        List of point names corresponding to the second dimension of point_data.
+        The list should contain the names of the points in the same order as they appear in the point_data array.
+
+    Returns:
+    --------
+    R_GH : np.ndarray
+        Array of shape (4, n_frames) containing the right Glenohumeral Joint Center.
+    L_GH : np.ndarray
+        Array of shape (4, n_frames) containing the left Glenohumeral Joint Center.
+    """
     # 1. Extract marker labels list from the C3D object
     all_labels = [label.strip() for label in name_point_list]
 
@@ -39,6 +56,31 @@ def calculate_RAB(point_data: np.ndarray, name_point_list: list):
 
 
 def calculate_mid_point(point_data: np.ndarray, name_point_list: list):
+    """
+    Calculate the joint centers (elbow, wrist, and finger) based on the mid-point method.
+
+    Parameters:
+    -----------
+    point_data : np.ndarray
+        Array of shape (n_channels, n_points, n_frames) containing the point data.
+    name_point_list : list
+        List of point names corresponding to the second dimension of point_data.
+
+    Returns:
+    --------
+    R_EJC : np.ndarray
+        Array of shape (4, n_frames) containing the right elbow joint center.
+    L_EJC : np.ndarray
+        Array of shape (4, n_frames) containing the left elbow joint center.
+    R_WJC : np.ndarray
+        Array of shape (4, n_frames) containing the right wrist joint center.
+    L_WJC : np.ndarray
+        Array of shape (4, n_frames) containing the left wrist joint center.
+    R_FJC : np.ndarray
+        Array of shape (4, n_frames) containing the right finger joint center.
+    L_FJC : np.ndarray
+        Array of shape (4, n_frames) containing the left finger joint center.
+    """
     # elbow joint center
     # 1. Extract marker labels list from the C3D object
     all_labels = [label.strip() for label in name_point_list]
