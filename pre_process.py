@@ -82,7 +82,7 @@ def correct_markerless_fq_file(trial: Path, ml_trial_path: Path, output_subject_
             c3d_ml["parameters"]["ROTATION"]["RATE"]["value"] = c3d_mb["parameters"]["POINT"]["RATE"]["value"]
     else:
         print(f"❌ The ratio of the frame counts is not 1 or 2 for {trial_name}. Ratio: {ratio}")
-        #stop here if the ratio is not 1 or 2
+        # stop here if the ratio is not 1 or 2
         return
 
     print(str(output_subject_folder / f"{trial_name}.c3d"))
@@ -284,7 +284,6 @@ def pre_processed_marker_less_files(
     points_ml_trimmed = points_ml_filtered[:, :, start_idx:end_idx]
 
     write_new_c3d(points_ml_trimmed, name_points, fq_ml, str(output_subject_folder / f"{trial_name}.c3d"))
-
 
 
 def fusion_markerless_model(path_synthpose: Path, path_rtmpose: Path, path_export: Path):

@@ -5,7 +5,7 @@ import ezc3d
 
 def load_c3d(path: Path):
     """
-    Load a C3D file and return the c3d object, point data, frame rate, and point labels.    
+    Load a C3D file and return the c3d object, point data, frame rate, and point labels.
     Parameters:
     -----------
     path : Path
@@ -34,7 +34,7 @@ def load_c3d(path: Path):
 def write_new_c3d(points: np.ndarray, name_points: list, fq_new_file: float, output_path: Path):
     """
     Write a new C3D file with the given points, point names, and frame rate.
-    
+
     Parameters:
     -----------
 
