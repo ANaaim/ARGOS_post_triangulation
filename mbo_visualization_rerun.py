@@ -46,6 +46,8 @@ def visualize(npy_file):
     )
 
     viz.rerun()
+    pause = input("Press Enter to exit...")
+    print(pause)
 
 
 if __name__ == "__main__":
