@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # ---------------------------------------------------------------------
     # PATHS
     # ---------------------------------------------------------------------
-    base_folder = Path("Kinematics_SB2026")
+    base_folder = Path("figures") / "kinematics"
 
     model_to_analyze = "with_2dof_hand"
 
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     # folder_fake_ML = base_folder / "test" / model_to_analyze / "fake_markerless"
 
     # Figures output folder
-    figure_root = Path("./figures_SB_2026") / model_to_analyze
+    figure_root = Path("./figures_SB_2026_all") / model_to_analyze
     #check if the folder exists, if not create it
     if not figure_root.exists():
         figure_root.mkdir(parents=True, exist_ok=True)
