@@ -7,7 +7,8 @@ import seaborn as sns
 
 def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str], dof_order: list[str],
                                 df: pl.DataFrame,
-                                output_dir: Path, data_to_plot: str):
+                                output_dir: Path, data_to_plot: str,
+                                limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
     
     for subject in subjects_to_process:
 
@@ -52,6 +53,7 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
                 hue="model",
                 order=dof_order,
                 showfliers=False,
+                whis=limit_boxplot_whiskers,
             )
 
             plt.title(
@@ -84,7 +86,8 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
 def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         dof_order: list[str], name_dof_order: dict[str, str],
         df: pl.DataFrame,
-        output_dir: Path, data_to_plot: str):
+        output_dir: Path, data_to_plot: str,
+        limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
     # Plot data per task for all subjects
     for task in tasks_to_process:
@@ -113,6 +116,7 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
             hue="model",
             order=dof_order,
             showfliers=False,
+            whis=limit_boxplot_whiskers,
         )
 
         plt.title(
@@ -144,7 +148,8 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
 def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         dof_order: list[str], name_dof_order: dict[str, str],
         df: pl.DataFrame,
-        output_dir: Path, data_to_plot: str):
+        output_dir: Path, data_to_plot: str,
+        limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
     # Plot data for each dof for all subjects
     for dof in dof_order:
@@ -173,6 +178,7 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
             hue="model",
             order=tasks_order,
             showfliers=False,
+            whis=limit_boxplot_whiskers,
         )
 
         plt.title(
@@ -253,7 +259,8 @@ if __name__ == "__main__":
         "26-Cymbals": "Cymbals",
     }
     subjects_to_process = df.select("subject").unique().sort("subject").to_series().to_list()
-    
+
+    limit_boxplot_whiskers = (2.5, 97.5)
     
     all_subjects_tasks(
         subjects_to_process=subjects_to_process,
@@ -261,16 +268,19 @@ if __name__ == "__main__":
         dof_order=dof_order,
         df=df,
         output_dir=OUTPUT_DIR,
-        data_to_plot=data_to_plot
+        data_to_plot=data_to_plot,
+        limit_boxplot_whiskers=limit_boxplot_whiskers
     )
     by_task(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
         dof_order=dof_order,name_dof_order=Name_dof_order,
         df=df,
-        output_dir=OUTPUT_DIR_TASK, data_to_plot=data_to_plot
+        output_dir=OUTPUT_DIR_TASK, data_to_plot=data_to_plot,
+        limit_boxplot_whiskers=limit_boxplot_whiskers
     )
 
     by_dof(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
         dof_order=dof_order,name_dof_order=Name_dof_order,
         df=df,
-        output_dir=OUTPUT_DIR_TASK, data_to_plot=data_to_plot
+        output_dir=OUTPUT_DIR_DOF, data_to_plot=data_to_plot,
+        limit_boxplot_whiskers=limit_boxplot_whiskers
     )
