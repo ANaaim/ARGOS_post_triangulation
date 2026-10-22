@@ -3,3 +3,4 @@
 /Kinematics*
 /old
 *.pyc
+*.parquet
