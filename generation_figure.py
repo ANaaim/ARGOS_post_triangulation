@@ -3,13 +3,18 @@ from pathlib import Path
 import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+sns.set_theme(style="whitegrid")
 
 def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str], dof_order: list[str],
-                                df: pl.DataFrame,
+                                path_to_data: Path,
                                 output_dir: Path, data_to_plot: str,
                                 limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
+    if not path_to_data.exists():
+        raise FileNotFoundError(f"Data file not found: {path_to_data}")
+    if path_to_data.suffix != ".parquet":
+        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
     
+    df = pl.read_parquet(path_to_data)
     for subject in subjects_to_process:
 
         tasks = (
@@ -85,10 +90,15 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
 
 def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         dof_order: list[str], name_dof_order: dict[str, str],
-        df: pl.DataFrame,
+        path_to_data: Path,
         output_dir: Path, data_to_plot: str,
         limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
+    if not path_to_data.exists():
+        raise FileNotFoundError(f"Data file not found: {path_to_data}")
+    if path_to_data.suffix != ".parquet":
+        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
+    df = pl.read_parquet(path_to_data)
     # Plot data per task for all subjects
     for task in tasks_to_process:
 
@@ -147,10 +157,15 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
 
 def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         dof_order: list[str], name_dof_order: dict[str, str],
-        df: pl.DataFrame,
+        path_to_data: Path, 
         output_dir: Path, data_to_plot: str,
         limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
+    if not path_to_data.exists():
+        raise FileNotFoundError(f"Data file not found: {path_to_data}")
+    if path_to_data.suffix != ".parquet":
+        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
+    df = pl.read_parquet(path_to_data)
     # Plot data for each dof for all subjects
     for dof in dof_order:
 
@@ -176,7 +191,7 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
             x="task",
             y=data_to_plot,
             hue="model",
-            order=tasks_order,
+            order=tasks_to_process,
             showfliers=False,
             whis=limit_boxplot_whiskers,
         )
@@ -192,7 +207,7 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         ax = plt.gca()
 
         ax.set_xticklabels(
-            [name_tasks_order[d] for d in tasks_order],
+            [name_tasks_order[d] for d in tasks_to_process],
             rotation=30,
             ha="right",
         )
@@ -210,7 +225,7 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
 
 
 if __name__ == "__main__":
-    sns.set_theme(style="whitegrid")
+
     data_to_plot = "error_deg" # abs_error_deg
     
     OUTPUT_DIR = Path("figures_strong_side") / data_to_plot / "boxplot"
@@ -222,7 +237,7 @@ if __name__ == "__main__":
     OUTPUT_DIR_TASK.mkdir(exist_ok=True, parents=True)
     OUTPUT_DIR_DOF.mkdir(exist_ok=True, parents=True)
 
-    df = pl.read_parquet("kinematic_errors_strong_side.parquet")
+    path_to_data = Path ("kinematic_errors_strong_side.parquet")
 
 
     dof_order = [
@@ -258,6 +273,7 @@ if __name__ == "__main__":
         "10-reach_and_grasp_far": "Reach and Grasp Far",
         "26-Cymbals": "Cymbals",
     }
+    df = pl.read_parquet(path_to_data)
     subjects_to_process = df.select("subject").unique().sort("subject").to_series().to_list()
 
     limit_boxplot_whiskers = (2.5, 97.5)
@@ -266,21 +282,21 @@ if __name__ == "__main__":
         subjects_to_process=subjects_to_process,
         tasks_to_process=tasks_order,
         dof_order=dof_order,
-        df=df,
+        path_to_data=path_to_data,
         output_dir=OUTPUT_DIR,
         data_to_plot=data_to_plot,
         limit_boxplot_whiskers=limit_boxplot_whiskers
     )
     by_task(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
         dof_order=dof_order,name_dof_order=Name_dof_order,
-        df=df,
+        path_to_data=path_to_data,
         output_dir=OUTPUT_DIR_TASK, data_to_plot=data_to_plot,
         limit_boxplot_whiskers=limit_boxplot_whiskers
     )
 
     by_dof(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
         dof_order=dof_order,name_dof_order=Name_dof_order,
-        df=df,
+        path_to_data=path_to_data,
         output_dir=OUTPUT_DIR_DOF, data_to_plot=data_to_plot,
         limit_boxplot_whiskers=limit_boxplot_whiskers
     )
