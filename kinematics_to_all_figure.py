@@ -7,7 +7,7 @@ import PlotConfig
 if __name__ == "__main__":
     ### GENERATE PARQUET FILE
     path_data_kinematics = Path("./Kinematics_SB2026_all")
-    path_to_export = Path("./figures_validation")
+    path_to_export = Path("./figures")
     path_to_export.mkdir(exist_ok=True, parents=True)
     reference_name = "Marker_based"
     dof_hand = "with_2dof_hand"
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     path_to_figure.mkdir(exist_ok=True, parents=True)
     path_to_figure_task.mkdir(exist_ok=True, parents=True)
     path_to_figure_dof.mkdir(exist_ok=True, parents=True)
-    path_to_data = Path ("kinematic_errors_strong_side.parquet")
+    path_to_data = filename_output
 
 
     dof_order = [

@@ -64,7 +64,19 @@ def save_boxplot(
     plt.close()
 
 def all_subjects_tasks(subjects_to_process: list[str], path_to_data: Path, output_dir: Path, config: PlotConfig.PlotConfig):
-    
+    """This function generates boxplots for each subject and task combination, saving the figures to the specified output directory.
+
+    Parameters
+    ----------
+    subjects_to_process : list[str]
+        List of the subjects to process 
+    path_to_data : Path
+        Path to the parquet file containing the data
+    output_dir : Path
+        Folder where the figures will be saved
+    config : PlotConfig.PlotConfig
+        Configuration object containing the plotting parameters.
+    """
     df = load_dataframe(path_to_data)
     
     for subject in subjects_to_process:
@@ -112,7 +124,18 @@ def all_subjects_tasks(subjects_to_process: list[str], path_to_data: Path, outpu
 def by_task(path_to_data: Path,
         output_dir: Path,
         config: PlotConfig.PlotConfig):
+    """This function generates boxplots for each task  with all the degrees of freedom (dof) in abscisse, showing the data for all subjects.
 
+
+    Parameters
+    ----------
+    path_to_data : Path
+        Path to the parquet file containing the data
+    output_dir : Path
+        Folder where the figures will be saved
+    config : PlotConfig.PlotConfig
+        Configuration object containing the plotting parameters.
+    """
     df = load_dataframe(path_to_data)
 
     # Plot data per task for all subjects
@@ -144,6 +167,17 @@ def by_task(path_to_data: Path,
 
 
 def by_dof(path_to_data: Path, output_dir: Path, config: PlotConfig.PlotConfig ):
+    """This function generates boxplots for each degree of freedom (dof) with all the tasks in abscisse, showing the data for all subjects.
+
+    Parameters
+    ----------
+    path_to_data : Path
+        Path to the parquet file containing the data
+    output_dir : Path
+        Path to the folder where the figures will be saved
+    config : PlotConfig.PlotConfig
+        Configuration object containing the plotting parameters.
+    """
 
     df = load_dataframe(path_to_data)
     # Plot data for each dof for all subjects
