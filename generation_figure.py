@@ -3,6 +3,7 @@ from pathlib import Path
 import polars as pl
 import matplotlib.pyplot as plt
 import seaborn as sns
+import PlotConfig
 sns.set_theme(style="whitegrid")
 
 def load_dataframe(path: Path) -> pl.DataFrame:
@@ -51,7 +52,7 @@ def save_boxplot(
             rotation=0,
             #ha="right", could be set to "right" if needed
             )
-
+    plt.ylim(-120, 120)
     plt.tight_layout()
 
     plt.savefig(
@@ -62,10 +63,8 @@ def save_boxplot(
 
     plt.close()
 
-def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str], dof_order: list[str],
-                                path_to_data: Path,
-                                output_dir: Path, data_to_plot: str,
-                                limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
+def all_subjects_tasks(subjects_to_process: list[str], path_to_data: Path, output_dir: Path, config: PlotConfig.PlotConfig):
+    
     df = load_dataframe(path_to_data)
     
     for subject in subjects_to_process:
@@ -78,8 +77,9 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
             .to_series()
             .to_list()
         )
+
         # remove tasks that are not in the tasks_to_process list
-        tasks = [task for task in tasks if task in tasks_to_process]
+        tasks = [task for task in tasks if task in config.task_order]
 
         for task in tasks:
 
@@ -88,13 +88,8 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
             out_dir = output_dir/ subject 
             out_dir.mkdir(parents=True, exist_ok=True)
 
-            plot_df = (
-                df.filter(
-                    (pl.col("subject") == subject)
-                    & (pl.col("task") == task)
-                )
-                .to_pandas()
-            )
+            plot_df = df.filter((pl.col("subject") == subject)
+                                & (pl.col("task") == task)).to_pandas()
 
             if len(plot_df) == 0:
                 continue
@@ -102,36 +97,32 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
             save_boxplot(
                 df=plot_df,
                 x="dof",
-                y=data_to_plot,
+                y=config.data_to_plot,
                 hue="model",
-                order=dof_order,
+                order=config.dof_order,
                 name_order = None,
                 title=f"{subject} - {task}",
                 xlabel="Degree of Freedom",
-                ylabel="Absolute angular error (deg)",
+                ylabel=config.data_to_plot_label,
                 output_file=out_dir / f"{subject}_{task}_boxplot.png",
-                whiskers=limit_boxplot_whiskers,
+                whiskers=config.whiskers,
             )
 
 
-def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
-        dof_order: list[str], name_dof_order: dict[str, str],
-        path_to_data: Path,
-        output_dir: Path, data_to_plot: str,
-        limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
+def by_task(path_to_data: Path,
+        output_dir: Path,
+        config: PlotConfig.PlotConfig):
 
     df = load_dataframe(path_to_data)
+
     # Plot data per task for all subjects
-    for task in tasks_to_process:
+    for task in config.task_order:
 
         print(task)
 
         out_dir = output_dir
 
-        plot_df = (
-            df.filter(pl.col("task") == task)
-            .to_pandas()
-        )
+        plot_df = df.filter(pl.col("task") == task).to_pandas()
 
         if plot_df.empty:
             continue
@@ -139,36 +130,30 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         save_boxplot(
             df=plot_df,
             x="dof",
-            y=data_to_plot,
+            y=config.data_to_plot,
             hue="model",
-            order=dof_order,
-            name_order = name_dof_order,
-            title=f"{name_tasks_order[task]} - All subjects",
+            order=config.dof_order,
+            name_order = config.dof_labels,
+            title=f"{config.task_labels[task]} - All subjects",
             xlabel="Degree of Freedom",
-            ylabel="Absolute angular error (deg)",
+            ylabel=config.data_to_plot_label,
             output_file=out_dir / f"{task}_boxplot.png",
-            whiskers=limit_boxplot_whiskers,
+            whiskers=config.whiskers,
         )
 
 
-def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
-        dof_order: list[str], name_dof_order: dict[str, str],
-        path_to_data: Path, 
-        output_dir: Path, data_to_plot: str,
-        limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
+
+def by_dof(path_to_data: Path, output_dir: Path, config: PlotConfig.PlotConfig ):
 
     df = load_dataframe(path_to_data)
     # Plot data for each dof for all subjects
-    for dof in dof_order:
+    for dof in config.dof_order:
 
         print(dof)
 
         out_dir = output_dir
 
-        plot_df = (
-            df.filter(pl.col("dof") == dof)
-            .to_pandas()
-        )
+        plot_df = df.filter(pl.col("dof") == dof).to_pandas()
 
         if plot_df.empty:
             continue
@@ -176,15 +161,15 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         save_boxplot(
             df=plot_df,
             x="task",
-            y=data_to_plot,
+            y=config.data_to_plot,
             hue="model",
-            order=tasks_to_process,
-            name_order = name_tasks_order,
-            title=f"{name_dof_order[dof]} - All subjects",
+            order=config.task_order,
+            name_order = config.task_labels,
+            title=f"{config.dof_labels[dof]} - All subjects",
             xlabel="Task",
-            ylabel="Absolute angular error (deg)",
+            ylabel=config.data_to_plot_label,
             output_file=out_dir / f"{dof}_boxplot.png",
-            whiskers=limit_boxplot_whiskers,
+            whiskers=config.whiskers,
         )
 
 
@@ -194,8 +179,8 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
 if __name__ == "__main__":
 
     data_to_plot = "error_deg" # abs_error_deg
-    
-    OUTPUT_DIR = Path("figures_strong_side") / data_to_plot / "boxplot"
+    data_to_plot_label = "Error [deg]"
+    OUTPUT_DIR = Path("figures_test_2") / data_to_plot / "boxplot"
     OUTPUT_DIR_TASK = OUTPUT_DIR / "task"
     OUTPUT_DIR_DOF = OUTPUT_DIR / "dof"
 
@@ -245,25 +230,31 @@ if __name__ == "__main__":
 
     limit_boxplot_whiskers = (2.5, 97.5)
     
+    config = PlotConfig.PlotConfig(
+        data_to_plot=data_to_plot,
+        data_to_plot_label=data_to_plot_label,
+        whiskers=limit_boxplot_whiskers,
+        dof_order=dof_order,
+        dof_labels=Name_dof_order,
+        task_order=tasks_order,
+        task_labels=Name_tasks_order
+    )
+    config.resolve(df)# fonction to take into account the fact that some field can be NONE
+    
     all_subjects_tasks(
         subjects_to_process=subjects_to_process,
-        tasks_to_process=tasks_order,
-        dof_order=dof_order,
         path_to_data=path_to_data,
         output_dir=OUTPUT_DIR,
-        data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
+        config=config
     )
-    by_task(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
-        dof_order=dof_order,name_dof_order=Name_dof_order,
+    by_task(
         path_to_data=path_to_data,
-        output_dir=OUTPUT_DIR_TASK, data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
+        output_dir=OUTPUT_DIR_TASK,
+        config=config
     )
 
-    by_dof(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
-        dof_order=dof_order,name_dof_order=Name_dof_order,
+    by_dof(
         path_to_data=path_to_data,
-        output_dir=OUTPUT_DIR_DOF, data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
+        output_dir=OUTPUT_DIR_DOF,
+        config=config
     )

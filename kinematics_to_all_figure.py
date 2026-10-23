@@ -2,7 +2,7 @@ import generation_parquet
 import generate_excel_comp_stat
 from pathlib import Path
 import generation_figure
-
+import PlotConfig
 
 if __name__ == "__main__":
     ### GENERATE PARQUET FILE
@@ -57,10 +57,10 @@ if __name__ == "__main__":
         df=generation_parquet.pl.read_parquet(filename_output),
         output_path=output_path_excel
     )
-    
+
     ### GENERATE FIGURES
     data_to_plot = "error_deg" # abs_error_deg
-    
+    data_to_plot_label = "Error [deg]"
     path_to_figure = path_to_export / data_to_plot / "boxplot"
     path_to_figure_task = path_to_figure / "task"
     path_to_figure_dof = path_to_figure / "dof"
@@ -109,25 +109,23 @@ if __name__ == "__main__":
     subjects_to_process = df.select("subject").unique().sort("subject").to_series().to_list()
 
     limit_boxplot_whiskers = (2.5, 97.5)
+    config = PlotConfig.PlotConfig(
+        data_to_plot=data_to_plot,
+        data_to_plot_label="Error [deg]",
+        whiskers=limit_boxplot_whiskers,
+        dof_order=dof_order,
+        dof_labels=Name_dof_order,
+        task_order=tasks_order,
+        task_labels=Name_tasks_order
+    )
+    config.resolve(df)
     generation_figure.all_subjects_tasks(
         subjects_to_process=subjects_to_process,
-        tasks_to_process=tasks_order,
-        dof_order=dof_order,
         path_to_data=path_to_data,
         output_dir=path_to_figure,
-        data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
+        config=config
     )
-    generation_figure.by_task(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
-        dof_order=dof_order,name_dof_order=Name_dof_order,
-        path_to_data=path_to_data,
-        output_dir=path_to_figure_task, data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
-    )
+    generation_figure.by_task(path_to_data=path_to_data,
+        output_dir=path_to_figure_task, config=config)
 
-    generation_figure.by_dof(tasks_to_process=tasks_order,name_tasks_order=Name_tasks_order,
-        dof_order=dof_order,name_dof_order=Name_dof_order,
-        path_to_data=path_to_data,
-        output_dir=path_to_figure_dof, data_to_plot=data_to_plot,
-        limit_boxplot_whiskers=limit_boxplot_whiskers
-    )
+    generation_figure.by_dof(path_to_data=path_to_data,output_dir=path_to_figure_dof, config=config)
