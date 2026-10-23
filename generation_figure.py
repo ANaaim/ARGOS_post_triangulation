@@ -5,16 +5,69 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_theme(style="whitegrid")
 
+def load_dataframe(path: Path) -> pl.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(f"Data file not found: {path}")
+
+    if path.suffix != ".parquet":
+        raise ValueError(f"Expected a parquet file: {path}")
+
+    return pl.read_parquet(path)
+
+
+def save_boxplot(
+    df,
+    x,
+    y,
+    hue,
+    order,
+    name_order,
+    title,
+    xlabel,
+    ylabel,
+    output_file,
+    whiskers=(2.5, 97.5),
+):
+    plt.figure(figsize=(18, 8))
+
+    sns.boxplot(
+        data=df,
+        x=x,
+        y=y,
+        hue=hue,
+        order=order,
+        showfliers=False,
+        whis=whiskers,
+    )
+
+    plt.title(title, fontsize=14, fontweight="bold")
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if name_order is not None:
+        ax = plt.gca()
+
+        ax.set_xticklabels(
+            [name_order[d] for d in order],
+            rotation=0,
+            #ha="right", could be set to "right" if needed
+            )
+
+    plt.tight_layout()
+
+    plt.savefig(
+        output_file,
+        dpi=300,
+        bbox_inches="tight",
+    )
+
+    plt.close()
+
 def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str], dof_order: list[str],
                                 path_to_data: Path,
                                 output_dir: Path, data_to_plot: str,
                                 limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
-    if not path_to_data.exists():
-        raise FileNotFoundError(f"Data file not found: {path_to_data}")
-    if path_to_data.suffix != ".parquet":
-        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
+    df = load_dataframe(path_to_data)
     
-    df = pl.read_parquet(path_to_data)
     for subject in subjects_to_process:
 
         tasks = (
@@ -46,46 +99,19 @@ def all_subjects_tasks(subjects_to_process: list[str], tasks_to_process:list[str
             if len(plot_df) == 0:
                 continue
 
-            #
-            # BOXPLOT
-            #
-            plt.figure(figsize=(18, 8))
-
-            sns.boxplot(
-                data=plot_df,
+            save_boxplot(
+                df=plot_df,
                 x="dof",
                 y=data_to_plot,
                 hue="model",
                 order=dof_order,
-                showfliers=False,
-                whis=limit_boxplot_whiskers,
+                name_order = None,
+                title=f"{subject} - {task}",
+                xlabel="Degree of Freedom",
+                ylabel="Absolute angular error (deg)",
+                output_file=out_dir / f"{subject}_{task}_boxplot.png",
+                whiskers=limit_boxplot_whiskers,
             )
-
-            plt.title(
-                f"{subject} - {task}",
-                fontsize=14,
-                fontweight="bold",
-            )
-
-            plt.ylabel(
-                "Absolute angular error (deg)"
-            )
-
-            plt.xlabel(
-                "Degree of Freedom"
-            )
-
-            plt.xticks(rotation=45)
-
-            plt.tight_layout()
-            figure_name=f"{subject}_{task}_boxplot.png"
-            plt.savefig(
-                out_dir / figure_name,
-                dpi=300,
-                bbox_inches="tight",
-            )
-
-            plt.close()
 
 
 def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
@@ -94,11 +120,7 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         output_dir: Path, data_to_plot: str,
         limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
-    if not path_to_data.exists():
-        raise FileNotFoundError(f"Data file not found: {path_to_data}")
-    if path_to_data.suffix != ".parquet":
-        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
-    df = pl.read_parquet(path_to_data)
+    df = load_dataframe(path_to_data)
     # Plot data per task for all subjects
     for task in tasks_to_process:
 
@@ -113,47 +135,21 @@ def by_task(tasks_to_process:list[str], name_tasks_order: dict[str, str],
 
         if plot_df.empty:
             continue
-
-        #
-        # BOXPLOT
-        #
-        plt.figure(figsize=(18, 8))
-
-        sns.boxplot(
-            data=plot_df,
+    
+        save_boxplot(
+            df=plot_df,
             x="dof",
             y=data_to_plot,
             hue="model",
             order=dof_order,
-            showfliers=False,
-            whis=limit_boxplot_whiskers,
+            name_order = name_dof_order,
+            title=f"{name_tasks_order[task]} - All subjects",
+            xlabel="Degree of Freedom",
+            ylabel="Absolute angular error (deg)",
+            output_file=out_dir / f"{task}_boxplot.png",
+            whiskers=limit_boxplot_whiskers,
         )
 
-        plt.title(
-            f"{name_tasks_order[task]} - All subjects",
-            fontsize=14,
-            fontweight="bold",
-        )
-
-        plt.ylabel("Absolute angular error (deg)")
-        plt.xlabel("Degree of Freedom")
-        ax = plt.gca()
-
-        ax.set_xticklabels(
-            [name_dof_order[d] for d in dof_order],
-            rotation=30,
-            ha="right",
-        )
-
-        plt.tight_layout()
-        figure_name=f"{task}_boxplot.png"
-        plt.savefig(
-            out_dir / figure_name,
-            dpi=300,
-            bbox_inches="tight",
-        )
-
-        plt.close()
 
 def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         dof_order: list[str], name_dof_order: dict[str, str],
@@ -161,11 +157,7 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         output_dir: Path, data_to_plot: str,
         limit_boxplot_whiskers: tuple[float, float] = (2.5, 97.5)):
 
-    if not path_to_data.exists():
-        raise FileNotFoundError(f"Data file not found: {path_to_data}")
-    if path_to_data.suffix != ".parquet":
-        raise ValueError(f"Data file must be a parquet file: {path_to_data}")
-    df = pl.read_parquet(path_to_data)
+    df = load_dataframe(path_to_data)
     # Plot data for each dof for all subjects
     for dof in dof_order:
 
@@ -181,46 +173,21 @@ def by_dof(tasks_to_process:list[str], name_tasks_order: dict[str, str],
         if plot_df.empty:
             continue
 
-        #
-        # BOXPLOT
-        #
-        plt.figure(figsize=(18, 8))
-
-        sns.boxplot(
-            data=plot_df,
+        save_boxplot(
+            df=plot_df,
             x="task",
             y=data_to_plot,
             hue="model",
             order=tasks_to_process,
-            showfliers=False,
-            whis=limit_boxplot_whiskers,
+            name_order = name_tasks_order,
+            title=f"{name_dof_order[dof]} - All subjects",
+            xlabel="Task",
+            ylabel="Absolute angular error (deg)",
+            output_file=out_dir / f"{dof}_boxplot.png",
+            whiskers=limit_boxplot_whiskers,
         )
 
-        plt.title(
-            f"{name_dof_order[dof]} - All subjects",
-            fontsize=14,
-            fontweight="bold",
-        )
 
-        plt.ylabel("Absolute angular error (deg)")
-        plt.xlabel("Task")
-        ax = plt.gca()
-
-        ax.set_xticklabels(
-            [name_tasks_order[d] for d in tasks_to_process],
-            rotation=30,
-            ha="right",
-        )
-
-        plt.tight_layout()
-        figure_name=f"{dof}_boxplot.png"
-        plt.savefig(
-            out_dir / figure_name,
-            dpi=300,
-            bbox_inches="tight",
-        )
-
-        plt.close()
 
 
 
@@ -273,7 +240,7 @@ if __name__ == "__main__":
         "10-reach_and_grasp_far": "Reach and Grasp Far",
         "26-Cymbals": "Cymbals",
     }
-    df = pl.read_parquet(path_to_data)
+    df = load_dataframe(path_to_data)
     subjects_to_process = df.select("subject").unique().sort("subject").to_series().to_list()
 
     limit_boxplot_whiskers = (2.5, 97.5)
