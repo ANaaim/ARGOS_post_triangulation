@@ -7,6 +7,37 @@ import ezc3d
 import polars as pl
 import pandas as pd
 
+dict_task = {
+    "00-static-stand" : "static",
+    "01-eat-yaourt" : "eat",
+    "02-cut-food" : "cut",
+    "03-open-bottle" : "open bottle",
+    "03-Open_a_Bottle_and_Pour" : "open and pour",
+    "04-Hand_to_Head" : "hand to head",
+    "04-take-in-box" : "take in box",
+    "05-use-computer" : "computer",
+    "06-drawing": "drawing",
+    "06-Open_Kit" : "open kit",
+    "07-use-ruler" : "ruler",
+    "08-cut-scissor": "cut scissor",
+    "09-erase-eraser": "erase eraser",
+    "10-reach_and_grasp_far" : "R&G far",
+    "11-reach_and_grasp_mid" : "R&G mid",
+    "12-reach_and_grasp_near" : "R&G near",
+    "13-playdoe" : "playdoe",
+    "14-put-toothpaste" : "put toothpaste",
+    "15-brush-teeth" : "brush teeth",
+    "16-comb-hair" : "comb hair",
+    "17-hand-to-back" : "hand to back",
+    "18-lift-tray" : "lift tray",
+    "20-catch-throw-ball" : "catch throw ball",
+    "21-abduction" : "GH abduction",
+    "22-flexion" : "GH flexion",
+    "23-rotation-plus-supination-full-arm-extended-front" : "GH rot + El sup extend",
+    "24-Elbow_Flexion_Extension" : "Elbow flexion",
+    "24-Elbow_Pronosupination_Bras_Bend" : "Elbow pronosupination",
+    "26-Cymbals": "cymbals",
+}
 def define_frame_arm(points_data,points_name,elbow_flexion_axis,GH_name,EJC_name):
     # Get the indices of the markers
     GH_index = points_name.index(GH_name)
@@ -162,18 +193,21 @@ def compare_frames(H_plane, H_isb):
     return quaternions, angles
 
 def comp_method(c3d_path):
-    frame_normal_plane, angle_v1_v2 = compute_norm_to_plane_arm(c3d_path, GH_name="R_GH", EJC_name="R_EJC", WJC_name="R_WJC")
+    frame_MB_normal_plane, angle_v1_v2 = compute_norm_to_plane_arm(c3d_path, GH_name="R_GH", EJC_name="R_EJC", WJC_name="R_WJC")
     frame_ISB = compute_elbow_flexion_axis(c3d_path)
     frame_synthpose = compute_elbow_flexion_axis_synthpose(c3d_path)
-    frame_fakeRtmpose,toto = compute_norm_to_plane_arm(c3d_path, GH_name="R_Shoulder", EJC_name="R_Elbow", WJC_name="R_Wrist")
+    frame_ML_normal_plane,angle = compute_norm_to_plane_arm(c3d_path, GH_name="R_Shoulder", EJC_name="R_Elbow", WJC_name="R_Wrist")
     # comparaison of the two methods
-    quaternion_mb,error_angles_mb = compare_frames(frame_normal_plane, frame_ISB)
-    quaternion_ml,error_angles_ml = compare_frames(frame_synthpose, frame_ISB)
-    quaternion_fakeRtm,error_angles_fakeRtm = compare_frames(frame_fakeRtmpose, frame_ISB)
+    quaternion_mb,error_angles_normal_plane_model = compare_frames(frame_MB_normal_plane, frame_ISB)
+    quaternion_ml,error_angles_synthpose = compare_frames(frame_synthpose, frame_ISB)
+    quaternion_fakeRtm,error_angles_ML_normal_plane = compare_frames(frame_ML_normal_plane, frame_ISB)
+    quaternion,error_angles_MLvsMB_normal_plane = compare_frames(frame_MB_normal_plane, frame_ML_normal_plane)
 
 
 
-    return error_angles_mb,error_angles_ml,error_angles_fakeRtm,angle_v1_v2
+
+
+    return error_angles_normal_plane_model,error_angles_synthpose,error_angles_ML_normal_plane,error_angles_MLvsMB_normal_plane,angle_v1_v2
 
 def batch_process(reference_root,filename_output):
     """Process a batch of c3d files and compare the two methods for elbow flexion axis estimation and generate a parquet file for all subject and task with the angles between the two methods (in degrees)
@@ -189,13 +223,15 @@ def batch_process(reference_root,filename_output):
         for c3d_file in sorted(subject_dir.glob("*.c3d")):
             task = c3d_file.stem
             print(f"   {task}")
-            error_angles_mb, error_angles_ml, error_angles_fakeRtm, angle_v1_v2 = comp_method(c3d_file)
-            for angle, plane_angle in zip(error_angles_mb, angle_v1_v2):
-                rows.append({"subject": subject,"model":"normal_plane", "task": task, "angle": angle, "plane_angle": plane_angle})
-            for angle,plane_angle in zip(error_angles_ml, angle_v1_v2):
-                rows.append({"subject": subject,"model":"synthpose", "task": task, "angle": angle, "plane_angle": plane_angle})
-            for angle,plane_angle in zip(error_angles_fakeRtm, angle_v1_v2):
-                rows.append({"subject": subject,"model":"fakeRtmpose", "task": task, "angle": angle, "plane_angle": plane_angle})
+            error_angles_normal_plane_model, error_angles_synthpose, error_angles_ML_normal_plane, error_angles_MLvsMB_normal_plane, angle_v1_v2 = comp_method(c3d_file)
+            for angle, plane_angle in zip(error_angles_normal_plane_model, angle_v1_v2):
+                rows.append({"subject": subject,"Elbow flexion axis":"normal plane MB", "task": dict_task[task], "angle": angle, "plane_angle": plane_angle})
+            for angle,plane_angle in zip(error_angles_synthpose, angle_v1_v2):
+                rows.append({"subject": subject,"Elbow flexion axis":"Synthpose", "task": dict_task[task], "angle": angle, "plane_angle": plane_angle})
+            for angle,plane_angle in zip(error_angles_ML_normal_plane, angle_v1_v2):
+                rows.append({"subject": subject,"Elbow flexion axis":"normal plane ML", "task": dict_task[task], "angle": angle, "plane_angle": plane_angle})
+            for angle,plane_angle in zip(error_angles_MLvsMB_normal_plane, angle_v1_v2):
+                rows.append({"subject": subject,"Elbow flexion axis":"normal plane ML vs MB", "task": dict_task[task], "angle": angle, "plane_angle": plane_angle})
     df = pl.DataFrame(rows)
 
     print(df.shape)
@@ -228,7 +264,7 @@ def generate_stats_from_parquet(filename_input, filename_output):
     # Subject × Task
     # -------------------------------------------------------------
     stats_subject_task = (
-        df.group_by(["subject", "task","model"])
+        df.group_by(["subject", "task","Elbow flexion axis"])
         .agg(
             [
                 pl.len().alias("n_frames"),
@@ -246,7 +282,7 @@ def generate_stats_from_parquet(filename_input, filename_output):
     # Task across all subjects
     # -------------------------------------------------------------
     stats_task = (
-        df.group_by(["task", "model"])
+        df.group_by(["task", "Elbow flexion axis"])
         .agg(
             [
                 pl.len().alias("n_frames"),
@@ -329,7 +365,7 @@ def generate_boxplots_from_parquet(filename_input, output_dir):
             data=df_sub,
             x="task",
             y="angle",
-            hue="model",
+            hue="Elbow flexion axis",
         )
 
         plt.title(f"{subject} - Angle difference between methods")
@@ -356,7 +392,7 @@ def generate_boxplots_from_parquet(filename_input, output_dir):
         data=df,
         x="task",
         y="angle",
-        hue="model",
+        hue="Elbow flexion axis",
     )
 
     plt.title("All subjects - Angle difference between methods")
@@ -384,13 +420,13 @@ def generate_boxplots_from_parquet(filename_input, output_dir):
         data=df,
         x="plane_angle",
         y="angle",
-        hue="model",
+        hue="Elbow flexion axis",
         alpha=0.05,
         s=3
     )
 
-    plt.xlabel("Angle between GH-EJC and WJC-EJC (deg)")
-    plt.ylabel("Difference between frame definitions (deg)")
+    plt.xlabel("Elbow plane angle (deg)")
+    plt.ylabel("Quaternion angle difference with the reference (deg)")
     plt.title("Error as a function of arm plane opening angle")
 
     plt.tight_layout()
@@ -411,12 +447,12 @@ def generate_boxplots_from_parquet(filename_input, output_dir):
         data=df,
         x="plane_bin",
         y="angle",
-        hue="model",
+        hue="Elbow flexion axis",
         showfliers=False
     )
 
     plt.xticks(rotation=90)
-    plt.xlabel("Angle between v1 and v2 (5° bins)")
+    plt.xlabel("Plane opening angle at the elbow (5° bins)")
     plt.ylabel("Difference between methods (deg)")
     plt.title("Error vs arm plane angle")
 
@@ -431,7 +467,7 @@ def generate_boxplots_from_parquet(filename_input, output_dir):
 
     sns.boxplot(
         data=df,
-        x="model",
+        x="Elbow flexion axis",
         y="angle"
     )
 
@@ -463,7 +499,7 @@ if __name__ == "__main__":
 
 
     print(f"Processing batch of c3d files and saving to {filename_parquet}...")
-    # batch_process(reference_root, filename_parquet)
+    batch_process(reference_root, filename_parquet)
     generate_stats_from_parquet(filename_parquet, filename_excel)
     generate_boxplots_from_parquet(filename_parquet, figure_folder)
 

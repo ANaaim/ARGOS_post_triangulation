@@ -7,6 +7,39 @@ import ezc3d
 import polars as pl
 import pandas as pd
 
+
+dict_task = {
+    "00-static-stand" : "static",
+    "01-eat-yaourt" : "eat",
+    "02-cut-food" : "cut",
+    "03-open-bottle" : "open bottle",
+    "03-Open_a_Bottle_and_Pour" : "open and pour",
+    "04-Hand_to_Head" : "hand to head",
+    "04-take-in-box" : "take in box",
+    "05-use-computer" : "computer",
+    "06-drawing": "drawing",
+    "06-Open_Kit" : "open kit",
+    "07-use-ruler" : "ruler",
+    "08-cut-scissor": "cut scissor",
+    "09-erase-eraser": "erase eraser",
+    "10-reach_and_grasp_far" : "R&G far",
+    "11-reach_and_grasp_mid" : "R&G mid",
+    "12-reach_and_grasp_near" : "R&G near",
+    "13-playdoe" : "playdoe",
+    "14-put-toothpaste" : "put toothpaste",
+    "15-brush-teeth" : "brush teeth",
+    "16-comb-hair" : "comb hair",
+    "17-hand-to-back" : "hand to back",
+    "18-lift-tray" : "lift tray",
+    "20-catch-throw-ball" : "catch throw ball",
+    "21-abduction" : "GH abduction",
+    "22-flexion" : "GH flexion",
+    "23-rotation-plus-supination-full-arm-extended-front" : "GH rot + El sup extend",
+    "24-Elbow_Flexion_Extension" : "Elbow flexion",
+    "24-Elbow_Pronosupination_Bras_Bend" : "Elbow pronosupination",
+    "26-Cymbals": "cymbals",
+}
+
 def define_frame_forearm(points_data,points_name,wrist_flexion_axis,EJC_name,WJC_name):
     # Get the indices of the markers
     EJC_index = points_name.index(EJC_name)
@@ -134,11 +167,15 @@ def comp_method(c3d_path):
     frame_fakeRtmpose = compute_wrist_flexion_axis_fakeRtmpose(c3d_path)
     frame_synthpose = compute_wrist_flexion_axis_synthpose(c3d_path)
     # comparaison of the two methods
+    
+    # Error relative to the ISB frame
     quaternion_rtm,error_angles_rtm = compare_frames(frame_rtmpose, frame_MB)
     quaternion_synth,error_angles_synth = compare_frames(frame_synthpose, frame_MB)
-    quaternion_fakeRtm,error_angles_fakeRtm = compare_frames(frame_fakeRtmpose, frame_MB)
-
-    return error_angles_rtm,error_angles_fakeRtm,error_angles_synth
+    quaternion_fakeRtm,error_angles_Rtm_using_MB = compare_frames(frame_fakeRtmpose, frame_MB)
+    # Error due to the 
+    quaternion_fakeMBfakeML,error_angles_MBvsML_hand_as_wrist = compare_frames(frame_rtmpose, frame_fakeRtmpose)
+    
+    return error_angles_rtm,error_angles_Rtm_using_MB,error_angles_synth,error_angles_MBvsML_hand_as_wrist
 
 def batch_process(reference_root,filename_output):
     """Process a batch of c3d files and compare the two methods for elbow flexion axis estimation and generate a parquet file for all subject and task with the angles between the two methods (in degrees)
@@ -154,13 +191,15 @@ def batch_process(reference_root,filename_output):
         for c3d_file in sorted(subject_dir.glob("*.c3d")):
             task = c3d_file.stem
             print(f"   {task}")
-            error_angles_rtm, error_angles_fakeRtm, error_angles_synth = comp_method(c3d_file)
+            error_angles_rtm, error_angles_Rtm_using_MB, error_angles_synth, error_angles_MBvsML_hand_as_wrist = comp_method(c3d_file)
             for angle in error_angles_rtm:
-                rows.append({"subject": subject,"model":"rtmpose", "task": task, "angle": angle})
-            for angle in error_angles_fakeRtm:
-                rows.append({"subject": subject,"model":"fakeRtmpose", "task": task, "angle": angle})
+                rows.append({"subject": subject,"model":"RTM-ML", "task": dict_task[task], "angle": angle})
+            for angle in error_angles_Rtm_using_MB:
+                rows.append({"subject": subject,"model":"RTM-MB", "task": dict_task[task], "angle": angle})
             for angle in error_angles_synth:
-                rows.append({"subject": subject,"model":"synthpose", "task": task, "angle": angle})
+                rows.append({"subject": subject,"model":"Synth", "task": dict_task[task], "angle": angle})
+            for angle in error_angles_MBvsML_hand_as_wrist:
+                rows.append({"subject": subject,"model":"RTM-ML vs RTM-MB", "task": dict_task[task], "angle": angle})
     df = pl.DataFrame(rows)
 
     print(df.shape)
@@ -375,7 +414,7 @@ if __name__ == "__main__":
 
 
     print(f"Processing batch of c3d files and saving to {filename_parquet}...")
-    # batch_process(reference_root, filename_parquet)
+    batch_process(reference_root, filename_parquet)
     generate_stats_from_parquet(filename_parquet, filename_excel)
     generate_boxplots_from_parquet(filename_parquet, figure_folder)
 
