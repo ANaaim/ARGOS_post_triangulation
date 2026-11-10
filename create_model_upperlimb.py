@@ -1334,9 +1334,6 @@ def rtmpose(
                     mesh=Mesh(("L_Shoulder", "L_Elbow"), is_local=False),
                 )
             )
-            # reduced_model.segments["Humerus"].add_marker(Marker("Delt_Ant", is_technical=True, is_anatomical=True))
-            # reduced_model.segments["Humerus"].add_marker(Marker("Delt_Mid", is_technical=True, is_anatomical=True))
-            # reduced_model.segments["Humerus"].add_marker(Marker("Delt_Post", is_technical=True, is_anatomical=True))
             reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_Shoulder", is_technical=True, is_anatomical=True))
             reduced_model.segments["L_Humerus_3"].add_marker(Marker("L_Elbow", is_technical=True, is_anatomical=True))
 

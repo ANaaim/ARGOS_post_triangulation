@@ -235,6 +235,8 @@ def batch_process(reference_root,filename_output):
     df = pl.DataFrame(rows)
 
     print(df.shape)
+    # check if the folder exists, if not create it
+    filename_output.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(
         filename_output
     )   
@@ -493,8 +495,8 @@ if __name__ == "__main__":
     # print("Angles between the two methods (in degrees):")
     # print(angles)
     reference_root = Path("data/pre_processed/marker_less/SynthRTMposeMB_Marker")
-    filename_parquet = Path("figures") / "angle_between_methods_elbow" / "angles_between_methods_elbow.parquet"
-    filename_excel = Path("figures") / "angle_between_methods_elbow" / "stats_angles_between_methods_elbow.xlsx"
+    filename_parquet = Path("figures") / "angles_between_methods_elbow" / "angles_between_methods_elbow.parquet"
+    filename_excel = Path("figures") / "angles_between_methods_elbow" / "stats_angles_between_methods_elbow.xlsx"
     figure_folder = Path("figures") / "angles_between_methods_elbow"
 
 

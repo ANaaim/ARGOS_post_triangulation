@@ -203,6 +203,8 @@ def batch_process(reference_root,filename_output):
     df = pl.DataFrame(rows)
 
     print(df.shape)
+    # check if the folder exists, if not create it
+    filename_output.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(
         filename_output
     )   
