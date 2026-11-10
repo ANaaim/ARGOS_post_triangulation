@@ -493,8 +493,8 @@ if __name__ == "__main__":
     # print("Angles between the two methods (in degrees):")
     # print(angles)
     reference_root = Path("data/pre_processed/marker_less/SynthRTMposeMB_Marker")
-    filename_parquet = Path("angles_between_methods_elbow.parquet")
-    filename_excel = Path("stats_angles_between_methods_elbow.xlsx")
+    filename_parquet = Path("figures") / "angle_between_methods_elbow" / "angles_between_methods_elbow.parquet"
+    filename_excel = Path("figures") / "angle_between_methods_elbow" / "stats_angles_between_methods_elbow.xlsx"
     figure_folder = Path("figures") / "angles_between_methods_elbow"
 
 
