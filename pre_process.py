@@ -292,6 +292,8 @@ def fusion_markerless_model(path_synthpose: Path, path_rtmpose: Path, path_expor
     """
 
     list_points_RTMPOSE = [
+        "L_hip",    
+        "L_shoulder"
         "L_elbow",
         "L_base_hand",
         "L_MCP_thumb",
@@ -299,6 +301,8 @@ def fusion_markerless_model(path_synthpose: Path, path_rtmpose: Path, path_expor
         "L_MCP_middle",
         "L_MCP_ring",
         "L_MCP_little",
+        "R_hip",
+        "R_shoulder",
         "R_elbow",
         "R_base_hand",
         "R_MCP_thumb",
@@ -344,7 +348,10 @@ def fusion_markerless_model(path_synthpose: Path, path_rtmpose: Path, path_expor
                     points_to_add[point_name] = point_data
                 else:
                     print(f"Point {point_name} not found in {trial_name} of {name_subject}")
-
+            # add the middle point of the hip 
+            if "L_hip" in points_to_add and "R_hip" in points_to_add:
+                mid_hip = (points_to_add["L_hip"] + points_to_add["R_hip"]) / 2
+                points_to_add["mid_hip"] = mid_hip
             acq = snip.add_point_from_dictionary(c3d_synthpose, points_to_add)
             # export the new c3d file in path_export
             acq.write(str(path_export / name_subject / f"{trial_name}.c3d"))
