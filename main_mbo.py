@@ -161,19 +161,26 @@ if __name__ == "__main__":
         else base_save_folder / "Rtmpose" / "with_1dof_hand"
     )
 
-    model_creation = create_model_upperlimb.rtmpose 
-    mbo(
-        root_folder_RTMPOSE,
-        static_filename,
-        model_creation,
-        folder_to_save_RTMPOSE,
-        two_dof_hand_model=two_dof_hand_model,
-        humerus_as_one_segment=humerus_as_one_segment,
-        show_animation=False,
-        list_subjects=list_subjects_to_process,
-        list_tasks=list_tasks_to_process,
-        side_to_process=side_to_process,
-    ) # Use the appropriate function for model creation
+    process_rtmpose = False  # Set to True if you want to process RTMPOSE data, False otherwise
+    process_marker_based = False  # Set to True if you want to process marker-based data, False otherwise
+    process_fake_rtmpose = True  # Set to True if you want to process fake RTMPOSE data, False otherwise
+    process_synthpose = False  # Set to True if you want to process Synthpose
+    process_synthrtmpose = False # Set to True if you want to process SynthRTMPOSE data, False otherwise
+
+    if process_rtmpose:    
+        model_creation = create_model_upperlimb.rtmpose 
+        mbo(
+            root_folder_RTMPOSE,
+            static_filename,
+            model_creation,
+            folder_to_save_RTMPOSE,
+            two_dof_hand_model=two_dof_hand_model,
+            humerus_as_one_segment=humerus_as_one_segment,
+            show_animation=False,
+            list_subjects=list_subjects_to_process,
+            list_tasks=list_tasks_to_process,
+            side_to_process=side_to_process,
+        ) # Use the appropriate function for model creation
 
 
 
@@ -184,20 +191,40 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "Marker_based" / "with_1dof_hand"
     )
-    model_creation = create_model_upperlimb.marker_based  # Use the appropriate function for model creation
-    mbo(
-        root_folder_marker_based,
-        static_filename,
-        model_creation,
-        folder_to_save_marker_based,
-        two_dof_hand_model=two_dof_hand_model,
-        humerus_as_one_segment=humerus_as_one_segment,
-        show_animation=False,
-        list_subjects=list_subjects_to_process,
-        list_tasks=list_tasks_to_process,
-        side_to_process=side_to_process,
-    )
+    if process_marker_based:
+        model_creation = create_model_upperlimb.marker_based  # Use the appropriate function for model creation
+        mbo(
+            root_folder_marker_based,
+            static_filename,
+            model_creation,
+            folder_to_save_marker_based,
+            two_dof_hand_model=two_dof_hand_model,
+            humerus_as_one_segment=humerus_as_one_segment,
+            show_animation=False,
+            list_subjects=list_subjects_to_process,
+            list_tasks=list_tasks_to_process,
+            side_to_process=side_to_process,
+        )
 
+    folder_to_save_fake_rtmpose = (
+        base_save_folder / "Fake_rtmpose" / "with_2dof_hand"
+        if two_dof_hand_model
+        else base_save_folder / "Fake_rtmpose" / "with_1dof_hand"
+    )
+    if process_fake_rtmpose:
+        model_creation = create_model_upperlimb.fake_rtmpose
+        mbo(
+            root_folder_marker_based,
+            static_filename,
+            model_creation,
+            folder_to_save_fake_rtmpose,
+            two_dof_hand_model=two_dof_hand_model,
+            humerus_as_one_segment=humerus_as_one_segment,
+            show_animation=False,
+            list_subjects=list_subjects_to_process,
+            list_tasks=list_tasks_to_process,
+            side_to_process=side_to_process,
+        )
     # SynthRTMPose
     root_folder_SynthRTMPose = Path(r".\data\pre_processed\marker_less\SynthRTMPose")
     folder_to_save_SynthRTMPose = (
@@ -205,19 +232,20 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "SynthRTMPose" / "with_1dof_hand"
     )
-    model_creation = create_model_upperlimb.synthRTM  # Use the appropriate function for model creation
-    mbo(
-        root_folder_SynthRTMPose,
-        static_filename,
-        model_creation,
-        folder_to_save_SynthRTMPose,
-        two_dof_hand_model=two_dof_hand_model,
-        humerus_as_one_segment=humerus_as_one_segment,
-        show_animation=False,
-        list_subjects=list_subjects_to_process,
-        list_tasks=list_tasks_to_process,
-        side_to_process=side_to_process,
-    )
+    if process_synthrtmpose:
+        model_creation = create_model_upperlimb.synthRTM  # Use the appropriate function for model creation
+        mbo(
+            root_folder_SynthRTMPose,
+            static_filename,
+            model_creation,
+            folder_to_save_SynthRTMPose,
+            two_dof_hand_model=two_dof_hand_model,
+            humerus_as_one_segment=humerus_as_one_segment,
+            show_animation=False,
+            list_subjects=list_subjects_to_process,
+            list_tasks=list_tasks_to_process,
+            side_to_process=side_to_process,
+        )
 
     # Synthpose
     root_folder_SynthPose = Path(r".\data\pre_processed\marker_less\SynthPose")
@@ -226,17 +254,18 @@ if __name__ == "__main__":
         if two_dof_hand_model
         else base_save_folder / "Synthpose" / "with_1dof_hand"
     )
-    model_creation = create_model_upperlimb.synthpose  # Use the appropriate function for model creation
-    mbo(
-        root_folder_SynthPose,
-        static_filename,
-        model_creation,
-        folder_to_save_SynthPose,
-        two_dof_hand_model=two_dof_hand_model,
-        humerus_as_one_segment=humerus_as_one_segment,
-        show_animation=False,
-        list_subjects=list_subjects_to_process,
-        list_tasks=list_tasks_to_process,
-        side_to_process=side_to_process,
-    )
+    if process_synthpose:
+        model_creation = create_model_upperlimb.synthpose  # Use the appropriate function for model creation
+        mbo(
+            root_folder_SynthPose,
+            static_filename,
+            model_creation,
+            folder_to_save_SynthPose,
+            two_dof_hand_model=two_dof_hand_model,
+            humerus_as_one_segment=humerus_as_one_segment,
+            show_animation=False,
+            list_subjects=list_subjects_to_process,
+            list_tasks=list_tasks_to_process,
+            side_to_process=side_to_process,
+        )
 
